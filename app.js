@@ -71,6 +71,8 @@ function showApp(user) {
   $("userGreeting").textContent = (user.user_metadata?.display_name || user.email?.split("@")[0] || "there").trim().split(/\s+/)[0];
   $("txDate").value = localDate();
   loadTransactions();
+  renderModuleShell();
+  loadModuleRows();
 }
 function formatAuthError(error) {
   const message = error?.message || "Something went wrong. Please try again.";
@@ -356,7 +358,8 @@ async function saveModuleRecord(event) {
   event.preventDefault();
   if(!activeUser)return;
   const cfg=moduleConfigs[currentModule];
-  const payload={user_id:activeUser.id,currency:"KES"};
+  const payload={user_id:activeUser.id};
+  if(currentModule!=="customers") payload.currency="KES";
   cfg.fields.forEach(field=>{
     const el=$("mf_"+field[0]);
     if(!el)return;
