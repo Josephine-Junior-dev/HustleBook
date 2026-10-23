@@ -311,7 +311,7 @@ function renderModuleShell() {
     Object.keys(moduleConfigs).map(key => '<option value="' + key + '"' + (key===currentModule?' selected':'') + '>' + escapeText(moduleConfigs[key].title) + '</option>').join("") +
     '</select><form id="moduleForm" class="tx-form" style="margin-top:12px">' +
     cfg.fields.map(field => '<div><label for="mf_' + field[0] + '">' + escapeText(field[1]) + '</label>' +
-      (field[2] === "select" ? '<select id="mf_' + field[0] + '" ' + (field[3]?'required':'') + '>' + field[4].map(opt=>'<option value="'+escapeText(opt)+'">'+escapeText(opt.replaceAll("_"," "))+'</option>').join("") + '</select>' :
+      (field[2] === "select" ? '<select id="mf_' + field[0] + '" ' + (field[3]?'required':'') + '>' + field[4].map(opt=>'<option value="'+escapeText(opt)+'">'+escapeText(({owed_by_me:"I owe someone",owed_to_me:"Someone owes me"}[opt] || opt.replaceAll("_"," ")))+'</option>').join("") + '</select>' :
       '<input id="mf_' + field[0] + '" type="' + field[2] + '" ' + (field[2]==="number"?'min="0" step="0.01"':'') + (field[3]?' required':'') + ' placeholder="' + escapeText(field[1]) + '">') + '</div>').join("") +
     '<div class="full" style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-green" id="moduleSave" type="submit">Save record</button><button class="btn btn-outline" id="moduleCancel" type="button">Clear form</button></div></form>' +
     '<p id="moduleMsg" class="auth-msg" aria-live="polite"></p><div id="moduleRows" style="display:grid;gap:9px;margin-top:12px"></div>';
