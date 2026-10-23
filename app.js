@@ -143,6 +143,7 @@ function showApp(user) {
   $("txDate").value = localDate();
   renderQuickNavigation();
   renderWorkspaceCards();
+  renderShopPanel();
   workspaceLoadPromise = loadWorkspacesAndTransactions();
   renderModuleShell();
   loadModuleRows();
@@ -242,6 +243,7 @@ async function loadWorkspacesAndTransactions() {
         $("txSubmit").textContent="Save transaction";
         await loadTransactions();
         await loadModuleRows();
+        await refreshShopPanel();
       };
     }
     activeWorkspaceId=workspaces.find(w=>w.workspace_type===activeWorkspaceType)?.id||null;
@@ -531,6 +533,159 @@ async function saveModuleRecord(event) {
     setMessage("moduleMsg","Record saved successfully.");
   } catch(error){setMessage("moduleMsg","Save failed: "+(error.message||"Please try again."),true);}
   finally{if($("moduleSave"))$("moduleSave").disabled=false;}
+}
+
+
+// Shop-first MVP: one product per sale keeps checkout phone-friendly.
+// The database RPC records the sale and reduces stock atomically.
+function renderShopPanel() {
+  const welcome = document.querySelector("#appOverlay .app-welcome");
+  if (!welcome || $("shopPanel")) return;
+  const panel = document.createElement("section");
+  panel.id = "shopPanel";
+  panel.className = "app-panel";
+  panel.innerHTML = `
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <div><div style="font-size:11px;font-weight:800;letter-spacing:1px;color:#27834b">SHOP & SMALL BUSINESS</div><h2 style="margin:5px 0;font-size:22px">Business overview</h2><p style="color:#68766d;font-size:13px;margin:0">Sales, stock and profit estimates for your selected business.</p></div>
+      <button type="button" class="btn btn-outline" id="shopRefresh">↻ Refresh</button>
+    </div>
+    <div id="shopMetrics" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:15px 0">
+      <div style="padding:13px;border:1px solid #e2e9e3;border-radius:12px"><small>Today's sales</small><strong id="shopTodaySales" style="display:block;font-size:21px;margin-top:5px">KSh 0</strong></div>
+      <div style="padding:13px;border:1px solid #e2e9e3;border-radius:12px"><small>Cash received today</small><strong id="shopCashToday" style="display:block;font-size:21px;margin-top:5px">KSh 0</strong></div>
+      <div style="padding:13px;border:1px solid #e2e9e3;border-radius:12px"><small>Estimated gross profit today</small><strong id="shopGrossToday" style="display:block;font-size:21px;margin-top:5px">KSh 0</strong></div>
+      <div style="padding:13px;border:1px solid #e2e9e3;border-radius:12px"><small>Low-stock products</small><strong id="shopLowStock" style="display:block;font-size:21px;margin-top:5px">0</strong></div>
+    </div>
+    <div style="background:#f7faf7;border:1px solid #e2e9e3;border-radius:12px;padding:14px;margin-bottom:15px">
+      <h3 style="margin:0 0 5px;font-size:17px">Set up your shop</h3>
+      <p style="color:#68766d;font-size:12px;margin:0 0 8px">Choose the closest business type and name your business.</p>
+      <form id="shopProfileForm" class="tx-form">
+        <div><label for="shopBusinessName">Business name</label><input id="shopBusinessName" maxlength="100" required placeholder="e.g. Mueni Mini Market"></div>
+        <div><label for="shopBusinessType">Business type</label><select id="shopBusinessType"><option value="general_shop">General shop / kiosk</option><option value="mini_market">Mini-market / grocery</option><option value="clothing">Clothes / shoes / fashion</option><option value="beauty">Cosmetics / beauty</option><option value="electronics">Electronics / phone accessories</option><option value="hardware">Hardware / building materials</option><option value="other_retail">Other retail shop</option></select></div>
+        <div class="full"><button type="submit" class="btn btn-green" id="shopProfileSave">Save business profile</button></div>
+      </form>
+      <p id="shopProfileMsg" class="auth-msg" aria-live="polite"></p>
+    </div>
+    <div style="border:1px solid #e2e9e3;border-radius:12px;padding:14px">
+      <h3 style="margin:0 0 5px;font-size:17px">Record a sale</h3>
+      <p style="color:#68766d;font-size:12px;margin:0 0 8px">Add products first in Products / stock. Saving a sale automatically reduces available stock.</p>
+      <form id="shopSaleForm" class="tx-form">
+        <div class="full"><label for="shopSaleProduct">Product</label><select id="shopSaleProduct" required><option value="">Loading products…</option></select></div>
+        <div><label for="shopSaleQty">Quantity sold</label><input id="shopSaleQty" type="number" min="0.01" step="0.01" value="1" required></div>
+        <div><label for="shopSalePrice">Selling price per item (KSh)</label><input id="shopSalePrice" type="number" min="0" step="0.01" required placeholder="0.00"></div>
+        <div><label for="shopSalePaid">Amount received (KSh)</label><input id="shopSalePaid" type="number" min="0" step="0.01" value="0" required></div>
+        <div><label for="shopSaleMethod">Payment method</label><select id="shopSaleMethod"><option value="cash">Cash</option><option value="mpesa">M-Pesa</option><option value="card">Card</option><option value="bank">Bank</option><option value="credit">Credit / unpaid</option><option value="other">Other</option></select></div>
+        <div><label for="shopSaleCustomer">Customer (optional)</label><input id="shopSaleCustomer" maxlength="120" placeholder="Customer name"></div>
+        <div><label for="shopSaleDate">Sale date</label><input id="shopSaleDate" type="date" required></div>
+        <div class="full" style="background:#f0f8f2;padding:12px;border-radius:10px"><small>Sale total</small><strong id="shopSaleTotal" style="display:block;font-size:23px">KSh 0.00</strong></div>
+        <div class="full"><button type="submit" class="btn btn-green" id="shopSaleSave">Save sale & update stock</button></div>
+      </form>
+      <p id="shopSaleMsg" class="auth-msg" aria-live="polite"></p>
+    </div>
+    <div style="margin-top:15px"><h3 style="font-size:17px;margin:0 0 8px">Recent sales</h3><div id="shopSalesRows" style="display:grid;gap:8px"><p>Sign in to view sales.</p></div></div>
+    <p style="font-size:11px;color:#68766d;margin-top:12px">Gross profit is an estimate based on the product cost saved at sale time. It excludes rent, wages and other operating expenses. This is an early MVP, not accounting or tax advice.</p>`;
+  const workspaceCard = $("workspaceChoiceCard");
+  if (workspaceCard) workspaceCard.insertAdjacentElement("afterend", panel);
+  else welcome.insertAdjacentElement("afterend", panel);
+  $("shopSaleDate").value = localDate();
+  $("shopRefresh").addEventListener("click", refreshShopPanel);
+  $("shopSaleProduct").addEventListener("change", () => {
+    const option = $("shopSaleProduct").selectedOptions[0];
+    if (option?.dataset.price) $("shopSalePrice").value = option.dataset.price;
+    updateShopSaleTotal();
+  });
+  ["shopSaleQty","shopSalePrice","shopSalePaid"].forEach(id => $(id).addEventListener("input", updateShopSaleTotal));
+  $("shopSaleForm").addEventListener("submit", saveShopSale);
+  $("shopProfileForm").addEventListener("submit", saveShopProfile);
+}
+function updateShopSaleTotal() {
+  const total = Math.max(0, Number($("shopSaleQty")?.value)||0) * Math.max(0, Number($("shopSalePrice")?.value)||0);
+  if ($("shopSaleTotal")) $("shopSaleTotal").textContent = money(total);
+}
+async function refreshShopPanel() {
+  if (!activeUser || !$("shopPanel")) return;
+  const workspace = workspaces.find(w => w.workspace_type === "business");
+  if (!workspace) {
+    $("shopSalesRows").innerHTML = "<p>Preparing your business area…</p>";
+    return;
+  }
+  const wid = workspace.id;
+  try {
+    const [productsResult, salesResult, profileResult] = await Promise.all([
+      db.from("hb_products").select("id,name,quantity,unit_cost,selling_price").eq("user_id",activeUser.id).eq("workspace_id",wid).order("name"),
+      db.from("hb_sales").select("id,product_name,quantity,unit_price,unit_cost,total_amount,amount_paid,customer_name,payment_method,sale_date,created_at").eq("user_id",activeUser.id).eq("workspace_id",wid).order("created_at",{ascending:false}).limit(50),
+      db.from("hb_business_profiles").select("business_name,business_type").eq("user_id",activeUser.id).eq("workspace_id",wid).maybeSingle()
+    ]);
+    if (productsResult.error) throw productsResult.error;
+    if (salesResult.error) throw salesResult.error;
+    if (profileResult.error && !/hb_business_profiles/i.test(profileResult.error.message||"")) throw profileResult.error;
+    const products=productsResult.data||[], sales=salesResult.data||[];
+    const today=localDate();
+    const todays=sales.filter(s=>s.sale_date===today);
+    $("shopTodaySales").textContent=money(todays.reduce((sum,s)=>sum+Number(s.total_amount||0),0));
+    $("shopCashToday").textContent=money(todays.reduce((sum,s)=>sum+Number(s.amount_paid||0),0));
+    $("shopGrossToday").textContent=money(todays.reduce((sum,s)=>sum+(Number(s.total_amount||0)-Number(s.unit_cost||0)*Number(s.quantity||0)),0));
+    $("shopLowStock").textContent=String(products.filter(p=>Number(p.quantity)<=5).length);
+    $("shopSaleProduct").innerHTML='<option value="">Choose a product</option>'+products.map(p=>'<option value="'+escapeText(p.id)+'" data-price="'+Number(p.selling_price||0)+'">'+escapeText(p.name)+' · stock '+Number(p.quantity||0)+'</option>').join("");
+    if(profileResult.data){
+      $("shopBusinessName").value=profileResult.data.business_name||"";
+      $("shopBusinessType").value=profileResult.data.business_type||"general_shop";
+    }
+    $("shopSalesRows").innerHTML=sales.length?sales.map(s=>{
+      const due=Math.max(0,Number(s.total_amount)-Number(s.amount_paid));
+      const profit=Number(s.total_amount)-Number(s.unit_cost)*Number(s.quantity);
+      return '<article style="border:1px solid #e2e9e3;border-radius:10px;padding:11px"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><strong>'+escapeText(s.product_name)+'</strong><strong>'+money(s.total_amount)+'</strong></div><div style="font-size:12px;color:#68766d;margin-top:5px">'+escapeText(s.sale_date)+' · Qty '+Number(s.quantity)+' · Paid '+money(s.amount_paid)+' · '+escapeText(s.payment_method)+'</div><div style="font-size:12px;margin-top:5px">Gross profit: '+money(profit)+(due>0?' · <span style="color:#b54747">Balance due: '+money(due)+'</span>':'')+'</div>'+(s.customer_name?'<div style="font-size:12px;color:#68766d">Customer: '+escapeText(s.customer_name)+'</div>':'')+'</article>';
+    }).join(""):"<p>No sales yet. Add stock, then record your first sale.</p>";
+    if(products.length===0) setMessage("shopSaleMsg","First add products in All features → Products / stock. Make sure Business & Hustles is selected.",false);
+  } catch(error) {
+    $("shopSalesRows").innerHTML='<p style="color:#b42318">Could not load shop data: '+escapeText(error.message||"Please try again.")+'</p>';
+    setMessage("shopSaleMsg","If this is the first setup, run the shop sales migration in Supabase SQL Editor. "+(error.message||""),true);
+  }
+}
+async function saveShopProfile(event) {
+  event.preventDefault();
+  if(!activeUser)return;
+  const workspace=workspaces.find(w=>w.workspace_type==="business");
+  if(!workspace){setMessage("shopProfileMsg","Business workspace is not ready. Refresh and try again.",true);return;}
+  const payload={user_id:activeUser.id,workspace_id:workspace.id,business_name:$("shopBusinessName").value.trim(),business_type:$("shopBusinessType").value};
+  if(!payload.business_name){setMessage("shopProfileMsg","Enter your business name.",true);return;}
+  $("shopProfileSave").disabled=true;
+  try {
+    const {data:existing,error:findError}=await db.from("hb_business_profiles").select("id").eq("user_id",activeUser.id).eq("workspace_id",workspace.id).maybeSingle();
+    if(findError)throw findError;
+    const result=existing
+      ? await db.from("hb_business_profiles").update(payload).eq("id",existing.id).eq("user_id",activeUser.id)
+      : await db.from("hb_business_profiles").insert(payload);
+    if(result.error)throw result.error;
+    setMessage("shopProfileMsg","Business profile saved.");
+  } catch(error){setMessage("shopProfileMsg","Could not save profile: "+(error.message||"Run the shop sales migration first."),true);}
+  finally{$("shopProfileSave").disabled=false;}
+}
+async function saveShopSale(event) {
+  event.preventDefault();
+  if(!activeUser)return;
+  const workspace=workspaces.find(w=>w.workspace_type==="business");
+  const productId=$("shopSaleProduct").value;
+  const quantity=Number($("shopSaleQty").value),price=Number($("shopSalePrice").value),paid=Number($("shopSalePaid").value);
+  const total=Math.round(quantity*price*100)/100;
+  if(!workspace){setMessage("shopSaleMsg","Business workspace is not ready. Refresh and try again.",true);return;}
+  if(!productId){setMessage("shopSaleMsg","Choose a product first.",true);return;}
+  if(!Number.isFinite(quantity)||quantity<=0||!Number.isFinite(price)||price<0||!Number.isFinite(paid)||paid<0||paid>total){setMessage("shopSaleMsg","Check quantity, selling price and amount received. Amount received cannot exceed the sale total.",true);return;}
+  $("shopSaleSave").disabled=true;
+  setMessage("shopSaleMsg","Saving sale and updating stock…");
+  try {
+    const {data,error}=await db.rpc("hb_record_sale",{
+      p_workspace_id:workspace.id,p_product_id:productId,p_quantity:quantity,p_unit_price:price,
+      p_amount_paid:paid,p_customer_name:$("shopSaleCustomer").value.trim()||null,
+      p_payment_method:$("shopSaleMethod").value,p_sale_date:$("shopSaleDate").value||localDate()
+    });
+    if(error)throw error;
+    $("shopSaleForm").reset();
+    $("shopSaleQty").value="1";$("shopSalePaid").value="0";$("shopSaleDate").value=localDate();
+    updateShopSaleTotal();
+    setMessage("shopSaleMsg","Sale saved successfully. Stock has been updated.");
+    await refreshShopPanel();
+  } catch(error){setMessage("shopSaleMsg","Sale failed: "+(error.message||"Run the shop sales migration and check product stock."),true);}
+  finally{$("shopSaleSave").disabled=false;}
 }
 
 try {
