@@ -389,9 +389,17 @@ async function saveModuleRecord(event) {
 try {
   const { data, error } = await db.auth.getSession();
   if (error) throw error;
-  if (data.session?.user) showApp(data.session.user);
+  if (data.session?.user) {
+    showApp(data.session.user);
+  } else {
+    // Open directly to sign-in; keep the marketing landing page out of the app flow.
+    document.body.classList.add("app-mode");
+    showAuth("login");
+  }
 } catch (error) {
   console.error("HustleBook session initialisation failed:", error);
+  document.body.classList.add("app-mode");
+  showAuth("login");
   setMessage("authMsg", "Could not check your saved session. Refresh the page and try again.", true);
 }
 db.auth.onAuthStateChange((event, session) => {
@@ -400,8 +408,9 @@ db.auth.onAuthStateChange((event, session) => {
   }
   if (event === "SIGNED_OUT") {
     activeUser = null;
-    document.body.classList.remove("app-mode");
+    document.body.classList.add("app-mode");
     $("appOverlay").style.display = "none";
+    showAuth("login");
     window.scrollTo({top:0,behavior:"smooth"});
   }
 });
