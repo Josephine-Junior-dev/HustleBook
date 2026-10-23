@@ -176,8 +176,8 @@ $("txForm").addEventListener("submit", async event => {
     transaction_type: $("txType").value,
     amount,
     currency: "KES",
-    category: $("txCategory").value,
-    description: $("txDescription").value.trim() || $("txCategory").value,
+    category: $("txCategory").value.trim() || "Other",
+    description: $("txDescription").value.trim() || $("txCategory").value.trim() || "Other",
     transaction_date: $("txDate").value || localDate()
   };
   $("txSubmit").disabled = true;
