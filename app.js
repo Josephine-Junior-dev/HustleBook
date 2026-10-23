@@ -250,6 +250,7 @@ async function loadWorkspacesAndTransactions() {
     $("workspaceHeading").textContent=(workspaceTypes.find(w=>w.type===activeWorkspaceType)?.name||"Personal")+" transactions";
     await loadTransactions();
     await loadModuleRows();
+    await refreshShopPanel();
   } catch(error) {
     setMessage("txMsg","Could not prepare your separate finance areas: "+(error.message||"Check that supabase/schema.sql has been run."),true);
   }
