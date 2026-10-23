@@ -19,7 +19,7 @@ header{background:#fff;color:var(--ink);border-bottom:1px solid #edf1ed}nav{heig
 #mobileAppNav{display:none}
 @media(max-width:700px){
  #appOverlay{padding-bottom:76px}
- #mobileAppNav{position:fixed;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;left:0;right:0;bottom:0;z-index:1200;background:#fff;border-top:1px solid #dfe9e1;padding:7px 5px calc(7px + env(safe-area-inset-bottom));box-shadow:0 -6px 22px #183c2a0d}
+ #mobileAppNav{position:fixed;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;left:0;right:0;bottom:0;z-index:9999;pointer-events:auto;touch-action:manipulation;background:#fff;border-top:1px solid #dfe9e1;padding:7px 5px calc(7px + env(safe-area-inset-bottom));box-shadow:0 -6px 22px #183c2a0d}
  #mobileAppNav button{min-width:0;border:0;background:transparent;color:#65736a;border-radius:10px;padding:7px 1px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font:inherit;font-size:10px;font-weight:750;line-height:1.15;cursor:pointer}
  #mobileAppNav button .nav-emoji{font-size:19px;line-height:1.1}
  #mobileAppNav button.active{background:#e8f6ec;color:#267447}
