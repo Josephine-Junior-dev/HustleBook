@@ -164,7 +164,7 @@ async function loadTransactions() {
         escapeText(row.category || "Other") + '</span></td><td>' +
         escapeText(row.transaction_type) + '</td><td style="font-weight:800;color:' +
         (isIncome ? "#218047" : "#b54747") + '">' + (isIncome ? "+" : "−") +
-        money(row.amount) + '</td><td><button type="button" class="btn btn-outline" data-edit-tx="' + escapeText(row.id) + '">Edit</button> <button type="button" class="btn btn-outline" data-delete-tx="' + escapeText(row.id) + '">Delete</button></td></tr>';
+        money(row.amount) + '</td><td class="action-icons"><button type="button" class="icon-action edit-icon" aria-label="Edit transaction" title="Edit transaction" data-edit-tx="' + escapeText(row.id) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg></button><button type="button" class="icon-action delete-icon" aria-label="Delete transaction" title="Delete transaction" data-delete-tx="' + escapeText(row.id) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m2 0-1 14H7L6 6m4 4v6m4-6v6"/></svg></button></td></tr>';
     }).join("") : '<tr><td colspan="5">No transactions yet. Add your first one above.</td></tr>';
   } catch (error) {
     $("txRows").innerHTML = '<tr><td colspan="5">Could not load transactions: ' +
@@ -328,7 +328,7 @@ async function loadModuleRows() {
     if(error) throw error;
     $("moduleRows").innerHTML=(data||[]).length ? data.map(row => {
       const summary=cfg.fields.map(field=>field[1]+": "+(row[field[0]] ?? "—")).join(" · ");
-      return '<article style="border:1px solid #e2e9e3;border-radius:12px;padding:13px;overflow-wrap:anywhere"><strong>'+escapeText(row.name || row.invoice_number || cfg.title.slice(0,-1))+'</strong><p style="font-size:12px;color:#68766d;margin:6px 0 10px">'+escapeText(summary)+'</p><button class="btn btn-outline" type="button" data-module-edit="'+escapeText(row.id)+'">Edit</button> <button class="btn btn-outline" type="button" data-module-delete="'+escapeText(row.id)+'">Delete</button></article>';
+      return '<article style="border:1px solid #e2e9e3;border-radius:12px;padding:13px;overflow-wrap:anywhere"><strong>'+escapeText(row.name || row.invoice_number || cfg.title.slice(0,-1))+'</strong><p style="font-size:12px;color:#68766d;margin:6px 0 10px">'+escapeText(summary)+'</p><div class="action-icons"><button class="icon-action edit-icon" type="button" aria-label="Edit record" title="Edit record" data-module-edit="'+escapeText(row.id)+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg></button><button class="icon-action delete-icon" type="button" aria-label="Delete record" title="Delete record" data-module-delete="'+escapeText(row.id)+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m2 0-1 14H7L6 6m4 4v6m4-6v6"/></svg></button></div></article>';
     }).join("") : '<p>No records yet.</p>';
     $("moduleRows").querySelectorAll("[data-module-edit]").forEach(btn=>btn.addEventListener("click",()=>{
       const row=(data||[]).find(item=>item.id===btn.dataset.moduleEdit);
