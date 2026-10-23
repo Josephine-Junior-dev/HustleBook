@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#172554">
+  <meta name="theme-color" content="#24583d">
   <meta name="description" content="HustleBook helps you manage personal money, household budgets and business finances in one simple place.">
   <title>HustleBook — Every Hustle. Every Home. Every Shilling.</title>
   <style>
@@ -14,30 +14,38 @@
     @media(max-width:520px){.wrap{width:min(100% - 28px,1120px)}nav{height:66px}.brand{font-size:19px}.navactions .btn{padding:10px 12px;font-size:12px}.hero{padding-top:38px}.hero p{font-size:15px}h1{font-size:43px}.hero-buttons .btn{width:100%}.mock{padding:14px}.balance{padding:17px}.amount{font-size:27px}.section-head{margin-bottom:25px}.features{grid-template-columns:1fr}.feature{padding:21px}.security{padding:24px}.security-list{grid-template-columns:1fr}.cta{padding:28px 20px}.foot{flex-direction:column}}
   </style>
 <style id="hustlebook-vibrant-theme">
-:root{--navy:#101820;--navy2:#202a31;--green:#00a859;--mint:#e5f8ee;--ink:#17211b;--muted:#68756d;--line:#e0e8e2;--paper:#f4f7f5;--white:#fff}
-body{background:#fff;color:#17211b}
-header{background:radial-gradient(ellipse at 82% 15%,#263b31 0%,transparent 42%),linear-gradient(135deg,#101820 0%,#17251e 65%,#0b3d2a 100%)}
-.logo{background:#00a859!important;box-shadow:0 8px 28px #00a85935!important}
-.btn-green{background:#00a859!important;color:#fff!important;box-shadow:0 8px 24px #00a85935!important}
-.btn-green:hover{background:#008f4c!important;box-shadow:0 12px 32px #00a85945!important}
-h1 span{color:#35d07f}
-.dot{background:#35d07f!important;box-shadow:0 0 12px #35d07f}
-.eyebrow{border-color:#ffffff30;background:#ffffff0c}
-.mock-shell{box-shadow:0 35px 90px #0005}
-.balance{background:linear-gradient(135deg,#101820,#1c3929 75%,#087f4f)!important}
-.positive,.check{color:#35c77a!important}
-.section-soft{background:linear-gradient(180deg,#f4f7f5,#edf4ef)!important}
-.kicker{color:#008f4c!important}
-.feature{box-shadow:0 8px 28px #15271b0a;transition:transform .2s,box-shadow .2s}
-.feature:hover{transform:translateY(-4px);box-shadow:0 16px 36px #15271b14}
-.feature-icon{background:#e5f8ee!important}
-.pill{background:#fff}
-.security{background:radial-gradient(ellipse at 90% 10%,#263b31 0%,transparent 42%),linear-gradient(135deg,#101820,#0b3d2a)!important}
-.cta{background:radial-gradient(ellipse at top right,#dff6e8,transparent 60%),linear-gradient(135deg,#f4f7f5,#e8f8ee)!important;border-color:#d6e9dc!important}
-footer{background:#101820!important}
-.auth-overlay{background:#101820dc!important}
-.app-top{background:linear-gradient(110deg,#101820,#202a31 70%,#087f4f)!important}
-.auth-card .logo{background:#00a859!important}
+:root{--navy:#173d2b;--navy2:#24583d;--green:#73d98b;--mint:#e7fbe9;--ink:#183126;--muted:#667b6e;--line:#d9efdf;--paper:#f1fbf3;--white:#fff}
+body{background:linear-gradient(135deg,#f7fff8,#eaf9ee 55%,#f5fff6);color:#183126}
+header{background:radial-gradient(ellipse at 78% 12%,#3f8059 0%,transparent 42%),linear-gradient(135deg,#183c2a 0%,#24563a 62%,#387a4e 100%)}
+.logo{background:linear-gradient(135deg,#a2f0ac,#5bd47a)!important;color:#153b27!important;box-shadow:0 8px 28px #83e59b55!important}
+.btn-green{background:linear-gradient(135deg,#9af0a5,#65d981)!important;color:#163c27!important;box-shadow:0 8px 24px #72db8b55!important}
+.btn-green:hover{background:linear-gradient(135deg,#b3f7bb,#77e392)!important;box-shadow:0 12px 32px #72db8b70!important}
+h1 span{color:#a5f4b0}.dot{background:#a5f4b0!important;box-shadow:0 0 14px #a5f4b0}
+.eyebrow{border-color:#c6f8d340;background:#ffffff12;backdrop-filter:blur(10px)}
+.mock-shell{background:#ffffff28;border:1px solid #ffffff75;border-radius:29px;padding:13px;backdrop-filter:blur(18px);box-shadow:0 35px 90px #061c1050}
+.mock{background:linear-gradient(145deg,#ffffffed,#f1fff4e8);border:1px solid #ffffff;border-radius:21px;box-shadow:inset 0 1px #ffffff}
+.balance{background:linear-gradient(135deg,#28553b,#367c4d 70%,#76c98a)!important;border:1px solid #b8f0c2;box-shadow:inset 0 1px #ffffff45,0 10px 25px #1e6b3c20}
+.positive,.check{color:#a5f4b0!important}
+.section-soft{background:linear-gradient(135deg,#eaf9ee,#f6fff7 55%,#e4f7e9)!important}
+.kicker{color:#238348!important}
+.feature{background:#ffffffb8;border:1px solid #ffffff;box-shadow:0 12px 32px #28613b0d, inset 0 1px #fff;backdrop-filter:blur(12px);transition:transform .2s,box-shadow .2s}
+.feature:hover{transform:translateY(-4px);box-shadow:0 18px 40px #28613b18}
+.feature-icon{background:linear-gradient(135deg,#dffbe5,#baf0c6)!important;box-shadow:inset 0 1px #fff}
+.pill{background:#ffffffbd;border-color:#d6efdc;box-shadow:0 4px 14px #28613b08;backdrop-filter:blur(8px)}
+.security{background:radial-gradient(ellipse at 90% 10%,#44845a 0%,transparent 42%),linear-gradient(135deg,#183c2a,#245c3b)!important;border:1px solid #b9edc5;box-shadow:0 20px 50px #245b371b}
+.cta{background:radial-gradient(ellipse at top right,#d6f8dd,transparent 60%),linear-gradient(135deg,#ffffffd9,#e4f8e9d9)!important;border:1px solid #ffffff!important;box-shadow:0 18px 45px #28613b12,inset 0 1px #fff;backdrop-filter:blur(14px)}
+footer{background:linear-gradient(120deg,#142d20,#1e4930)!important}
+.auth-overlay{background:#143b28c9!important;backdrop-filter:blur(14px)!important}
+.auth-card{background:linear-gradient(145deg,#ffffff,#f0fff3);border:1px solid #ffffff;box-shadow:0 25px 90px #071f1266,inset 0 1px #fff}
+.auth-close{background:#e5f8e9;color:#214d31}
+.auth-card input,.tx-form input,.tx-form select{border-color:#d2ead8;background:#fbfffc}
+.auth-card input:focus,.tx-form input:focus,.tx-form select:focus{outline:2px solid #8ce5a0;border-color:#49bd6b}
+.auth-card a{color:#218047!important}
+.app-overlay{background:linear-gradient(135deg,#f4fff6,#e9f8ed 55%,#f7fff8)!important}
+.app-top{background:linear-gradient(110deg,#183c2a,#24583b 70%,#438454)!important;box-shadow:0 6px 24px #183c2a20}
+.app-stat,.app-panel{background:#ffffffd9;border:1px solid #fff;box-shadow:0 10px 30px #245b370c,inset 0 1px #fff;backdrop-filter:blur(10px)}
+.app-stat strong{color:#1c5533}
+.tx-list th,.tx-list td{border-bottom-color:#e5f2e8}
 @media(prefers-reduced-motion:reduce){.feature,.btn{transition:none}}
 </style>
 </head>
