@@ -11,11 +11,21 @@ const $ = id => document.getElementById(id);
 let authMode = "login";
 let activeUser = null;
 let loadingTransactions = false;
+let savedTotals = { income: 0, expense: 0 };
 let authRequestInProgress = false;
 
 const money = value => new Intl.NumberFormat("en-KE", {
   style: "currency", currency: "KES", maximumFractionDigits: 2
 }).format(Number(value) || 0);
+function renderTotals() {
+  const draftAmount = Number($("txAmount")?.value) || 0;
+  const draftType = $("txType")?.value;
+  const draftIncome = draftType === "income" ? draftAmount : 0;
+  const draftExpense = draftType === "expense" ? draftAmount : 0;
+  $("sumIncome").textContent = money(savedTotals.income + draftIncome);
+  $("sumExpense").textContent = money(savedTotals.expense + draftExpense);
+  $("sumBalance").textContent = money(savedTotals.income + draftIncome - savedTotals.expense - draftExpense);
+}
 const localDate = () => {
   const now = new Date();
   return [now.getFullYear(), String(now.getMonth() + 1).padStart(2, "0"), String(now.getDate()).padStart(2, "0")].join("-");
@@ -141,9 +151,8 @@ async function loadTransactions() {
       if (row.transaction_type === "income") income += Number(row.amount);
       if (row.transaction_type === "expense") expense += Number(row.amount);
     });
-    $("sumIncome").textContent = money(income);
-    $("sumExpense").textContent = money(expense);
-    $("sumBalance").textContent = money(income - expense);
+    savedTotals = { income, expense };
+    renderTotals();
     $("txRows").innerHTML = rows.length ? rows.map(row => {
       const isIncome = row.transaction_type === "income";
       const label = row.description || row.category || "Transaction";
@@ -163,6 +172,8 @@ async function loadTransactions() {
   }
 }
 
+$("txAmount").addEventListener("input", renderTotals);
+$("txType").addEventListener("change", renderTotals);
 $("txForm").addEventListener("submit", async event => {
   event.preventDefault();
   if (!activeUser) { showAuth("login"); return; }
@@ -187,6 +198,7 @@ $("txForm").addEventListener("submit", async event => {
     if (error) throw error;
     $("txAmount").value = "";
     $("txDescription").value = "";
+    renderTotals();
     setMessage("txMsg", "Transaction saved successfully.");
     await loadTransactions();
   } catch (error) {
