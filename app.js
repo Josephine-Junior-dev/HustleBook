@@ -374,9 +374,9 @@ async function saveModuleRecord(event) {
       : await db.from(cfg.table).insert(payload);
     if(result.error)throw result.error;
     editingModuleRecord=null;
-    setMessage("moduleMsg","Record saved successfully.");
     renderModuleShell();
     await loadModuleRows();
+    setMessage("moduleMsg","Record saved successfully.");
   } catch(error){setMessage("moduleMsg","Save failed: "+(error.message||"Please try again."),true);}
   finally{if($("moduleSave"))$("moduleSave").disabled=false;}
 }
