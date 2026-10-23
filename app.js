@@ -14,6 +14,9 @@ let loadingTransactions = false;
 let savedTotals = { income: 0, expense: 0 };
 let authRequestInProgress = false;
 let editingTransactionId = null;
+let workspaces = [];
+let activeWorkspaceType = "personal";
+let activeWorkspaceId = null;
 
 const money = value => new Intl.NumberFormat("en-KE", {
   style: "currency", currency: "KES", maximumFractionDigits: 2
@@ -72,7 +75,7 @@ function showApp(user) {
   $("appOverlay").style.display = "block";
   $("userGreeting").textContent = (user.user_metadata?.display_name || user.email?.split("@")[0] || "there").trim().split(/\s+/)[0];
   $("txDate").value = localDate();
-  loadTransactions();
+  loadWorkspacesAndTransactions();
   renderModuleShell();
   loadModuleRows();
 }
@@ -135,15 +138,65 @@ $("authForm").addEventListener("submit", async event => {
   }
 });
 
+async function loadWorkspacesAndTransactions() {
+  if (!activeUser) return;
+  const workspaceTypes = [
+    {type:"personal",name:"Personal"},
+    {type:"household",name:"Household & Family"},
+    {type:"business",name:"Business & Hustles"}
+  ];
+  try {
+    const {data,error}=await db.from("hb_workspaces").select("id,name,workspace_type").eq("user_id",activeUser.id);
+    if(error) throw error;
+    workspaces=data||[];
+    for (const item of workspaceTypes) {
+      if (!workspaces.some(w=>w.workspace_type===item.type)) {
+        const {data:created,error:createError}=await db.from("hb_workspaces")
+          .insert({user_id:activeUser.id,name:item.name,workspace_type:item.type})
+          .select("id,name,workspace_type").single();
+        if(createError) throw createError;
+        workspaces.push(created);
+      }
+    }
+    const selector=$("workspacePicker");
+    if(selector) {
+      selector.innerHTML=workspaceTypes.map(item=>'<option value="'+item.type+'">'+escapeText(item.name)+'</option>').join("");
+      selector.value=activeWorkspaceType;
+      selector.onchange=async()=>{
+        activeWorkspaceType=selector.value;
+        activeWorkspaceId=workspaces.find(w=>w.workspace_type===activeWorkspaceType)?.id||null;
+        const label=workspaceTypes.find(w=>w.type===activeWorkspaceType)?.name||"Personal";
+        $("workspaceHeading").textContent=label+" transactions";
+        $("workspaceDescription").textContent="Income, expenses and balance shown only for "+label+".";
+        editingTransactionId=null;
+        $("txForm").reset();
+        $("txDate").value=localDate();
+        $("txSubmit").textContent="Save transaction";
+        await loadTransactions();
+      };
+    }
+    activeWorkspaceId=workspaces.find(w=>w.workspace_type===activeWorkspaceType)?.id||null;
+    $("workspaceHeading").textContent=(workspaceTypes.find(w=>w.type===activeWorkspaceType)?.name||"Personal")+" transactions";
+    await loadTransactions();
+  } catch(error) {
+    setMessage("txMsg","Could not prepare your separate finance areas: "+(error.message||"Check that supabase/schema.sql has been run."),true);
+  }
+}
+
 async function loadTransactions() {
   if (!activeUser || loadingTransactions) return;
   loadingTransactions = true;
   $("txRows").innerHTML = '<tr><td colspan="5">Loading your records…</td></tr>';
   try {
-    const { data, error } = await db
-      .from("hb_transactions")
-      .select("id,transaction_type,amount,currency,category,description,transaction_date")
-      .eq("user_id", activeUser.id)
+    let query = db.from("hb_transactions")
+      .select("id,transaction_type,amount,currency,category,description,transaction_date,workspace_id,created_at")
+      .eq("user_id", activeUser.id);
+    if (activeWorkspaceId) {
+      query = activeWorkspaceType === "personal"
+        ? query.or("workspace_id.eq."+activeWorkspaceId+",workspace_id.is.null")
+        : query.eq("workspace_id",activeWorkspaceId);
+    }
+    const { data, error } = await query
       .order("transaction_date", { ascending: false })
       .order("created_at", { ascending: false })
       .limit(100);
@@ -230,7 +283,8 @@ $("txForm").addEventListener("submit", async event => {
     currency: "KES",
     category: $("txCategory").value.trim() || "Other",
     description: $("txDescription").value.trim() || $("txCategory").value.trim() || "Other",
-    transaction_date: $("txDate").value || localDate()
+    transaction_date: $("txDate").value || localDate(),
+    workspace_id: activeWorkspaceId
   };
   $("txSubmit").disabled = true;
   setMessage("txMsg", "Saving transaction…");
