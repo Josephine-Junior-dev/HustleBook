@@ -306,7 +306,10 @@ function renderModuleShell() {
   if (!host) return;
   const cfg = moduleConfigs[currentModule];
   host.innerHTML = '<h2 style="margin:0 0 12px;font-size:21px">' + escapeText(cfg.title) + '</h2>' +
-    '<label for="modulePicker" style="display:block;font-size:12px;font-weight:750;margin-bottom:5px">Manage another area</label>' +
+    '<p style="font-size:13px;color:#68766d;margin:0 0 10px">Choose a tool below. Each area has its own saved records.</p>' +
+    '<div id="moduleNav" style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px">' +
+    Object.keys(moduleConfigs).map(key => '<button type="button" data-open-module="' + key + '" class="btn ' + (key===currentModule?'btn-green':'btn-outline') + '" style="padding:9px 12px;font-size:12px">' + escapeText(moduleConfigs[key].title) + '</button>').join("") +
+    '</div><label for="modulePicker" style="display:block;font-size:12px;font-weight:750;margin-bottom:5px">Or choose an area</label>' +
     '<select id="modulePicker" style="width:100%;padding:12px;border:1px solid #dce5de;border-radius:10px;background:white;font:inherit">' +
     Object.keys(moduleConfigs).map(key => '<option value="' + key + '"' + (key===currentModule?' selected':'') + '>' + escapeText(moduleConfigs[key].title) + '</option>').join("") +
     '</select><form id="moduleForm" class="tx-form" style="margin-top:12px">' +
@@ -315,6 +318,7 @@ function renderModuleShell() {
       '<input id="mf_' + field[0] + '" type="' + field[2] + '" ' + (field[2]==="number"?'min="0" step="0.01"':'') + (field[3]?' required':'') + ' placeholder="' + escapeText(field[1]) + '">') + '</div>').join("") +
     '<div class="full" style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-green" id="moduleSave" type="submit">Save record</button><button class="btn btn-outline" id="moduleCancel" type="button">Clear form</button></div></form>' +
     '<p id="moduleMsg" class="auth-msg" aria-live="polite"></p><div id="moduleRows" style="display:grid;gap:9px;margin-top:12px"></div>';
+  $("moduleNav").querySelectorAll("[data-open-module]").forEach(button => button.addEventListener("click", () => { currentModule=button.dataset.openModule; editingModuleRecord=null; renderModuleShell(); loadModuleRows(); }));
   $("modulePicker").addEventListener("change", () => { currentModule=$("modulePicker").value; editingModuleRecord=null; renderModuleShell(); loadModuleRows(); });
   $("moduleCancel").addEventListener("click", () => { editingModuleRecord=null; renderModuleShell(); loadModuleRows(); });
   $("moduleForm").addEventListener("submit", saveModuleRecord);
@@ -359,7 +363,7 @@ async function saveModuleRecord(event) {
   if(!activeUser)return;
   const cfg=moduleConfigs[currentModule];
   const payload={user_id:activeUser.id};
-  if(currentModule!=="customers") payload.currency="KES";
+  if(["budgets","debts","savings","products","invoices"].includes(currentModule)) payload.currency="KES";
   cfg.fields.forEach(field=>{
     const el=$("mf_"+field[0]);
     if(!el)return;
