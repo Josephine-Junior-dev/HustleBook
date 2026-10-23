@@ -195,7 +195,18 @@ $("txForm").addEventListener("submit", async event => {
     $("txSubmit").disabled = false;
   }
 });
-function openTransactionForm(type) {\n  if (type) $("txType").value = type;\n  $("txPanel").scrollIntoView({ behavior: "smooth", block: "start" });\n  $("txAmount").focus({ preventScroll: true });\n}\n$("addTxJump").addEventListener("click", () => openTransactionForm());\n$("incomeCard").addEventListener("click", () => openTransactionForm("income"));\n$("expenseCard").addEventListener("click", () => openTransactionForm("expense"));\n$("balanceCard").addEventListener("click", () => $("txRows").closest(".app-panel").scrollIntoView({ behavior: "smooth", block: "start" }));\n["incomeCard","expenseCard","balanceCard"].forEach(id => $(id).addEventListener("keydown", event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); $(id).click(); } }));
+function openTransactionForm(type) {
+  if (type) $("txType").value = type;
+  $("txPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+  $("txAmount").focus({ preventScroll: true });
+}
+$("addTxJump").addEventListener("click", () => openTransactionForm());
+$("incomeCard").addEventListener("click", () => openTransactionForm("income"));
+$("expenseCard").addEventListener("click", () => openTransactionForm("expense"));
+$("balanceCard").addEventListener("click", () => $("txRows").closest(".app-panel").scrollIntoView({ behavior: "smooth", block: "start" }));
+["incomeCard","expenseCard","balanceCard"].forEach(id => $(id).addEventListener("keydown", event => {
+  if (event.key === "Enter" || event.key === " ") { event.preventDefault(); $(id).click(); }
+}));
 $("signOutBtn").addEventListener("click", async () => {
   $("signOutBtn").disabled = true;
   try {
