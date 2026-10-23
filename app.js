@@ -17,6 +17,7 @@ let editingTransactionId = null;
 let workspaces = [];
 let activeWorkspaceType = "personal";
 let activeWorkspaceId = null;
+let workspaceLoadPromise = Promise.resolve();
 
 const money = value => new Intl.NumberFormat("en-KE", {
   style: "currency", currency: "KES", maximumFractionDigits: 2
@@ -81,7 +82,10 @@ function renderQuickNavigation() {
     ["savings","🎯","Savings goals"],
     ["customers","👥","Customers"],
     ["products","📦","Products & stock"],
-    ["invoices","🧾","Invoices"]
+    ["invoices","🧾","Invoices"],
+    ["suppliers","🚚","Suppliers"],
+    ["jobs","🛠️","Jobs & services"],
+    ["reminders","⏰","Bills & reminders"]
   ];
   nav.querySelector("#quickFeatureButtons").innerHTML = buttons.map(([key,icon,label]) =>
     '<button type="button" data-quick-feature="'+key+'" class="btn btn-outline" style="justify-content:flex-start;text-align:left;min-height:46px;white-space:normal">'+icon+' '+label+'</button>'
@@ -110,14 +114,23 @@ function renderWorkspaceCards() {
   card.className = "app-panel";
   card.innerHTML = '<h2 style="margin:0 0 5px;font-size:20px">Choose your finance area</h2><p style="margin:0 0 12px;color:#69766d;font-size:13px">Tap Personal, Household or Business to open its transactions and totals.</p><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px"><button type="button" data-workspace-card="personal" class="btn btn-outline" style="min-height:72px;display:flex;flex-direction:column;gap:4px;white-space:normal">👤<span>Personal</span></button><button type="button" data-workspace-card="household" class="btn btn-outline" style="min-height:72px;display:flex;flex-direction:column;gap:4px;white-space:normal">🏡<span>Household & Family</span></button><button type="button" data-workspace-card="business" class="btn btn-outline" style="min-height:72px;display:flex;flex-direction:column;gap:4px;white-space:normal">💼<span>Business & Hustles</span></button></div>';
   welcome.insertAdjacentElement("afterend", card);
-  card.addEventListener("click", event => {
+  card.addEventListener("click", async event => {
     const button = event.target.closest("[data-workspace-card]");
     if (!button) return;
-    const picker = $("workspacePicker");
-    if (!picker) return;
-    picker.value = button.dataset.workspaceCard;
-    picker.dispatchEvent(new Event("change"));
-    $("txPanel")?.scrollIntoView({behavior:"smooth",block:"start"});
+    card.querySelectorAll("button").forEach(item => item.disabled = true);
+    try {
+      await workspaceLoadPromise;
+      const picker = $("workspacePicker");
+      if (!picker) return;
+      picker.value = button.dataset.workspaceCard;
+      picker.dispatchEvent(new Event("change"));
+      await loadModuleRows();
+      $("txPanel")?.scrollIntoView({behavior:"smooth",block:"start"});
+    } catch (error) {
+      setMessage("txMsg", "Could not open this finance area: " + (error.message || "Please try again."), true);
+    } finally {
+      card.querySelectorAll("button").forEach(item => item.disabled = false);
+    }
   });
 }
 function showApp(user) {
@@ -130,7 +143,7 @@ function showApp(user) {
   $("txDate").value = localDate();
   renderQuickNavigation();
   renderWorkspaceCards();
-  loadWorkspacesAndTransactions();
+  workspaceLoadPromise = loadWorkspacesAndTransactions();
   renderModuleShell();
   loadModuleRows();
 }
@@ -228,11 +241,13 @@ async function loadWorkspacesAndTransactions() {
         $("txDate").value=localDate();
         $("txSubmit").textContent="Save transaction";
         await loadTransactions();
+        await loadModuleRows();
       };
     }
     activeWorkspaceId=workspaces.find(w=>w.workspace_type===activeWorkspaceType)?.id||null;
     $("workspaceHeading").textContent=(workspaceTypes.find(w=>w.type===activeWorkspaceType)?.name||"Personal")+" transactions";
     await loadTransactions();
+    await loadModuleRows();
   } catch(error) {
     setMessage("txMsg","Could not prepare your separate finance areas: "+(error.message||"Check that supabase/schema.sql has been run."),true);
   }
@@ -404,7 +419,13 @@ const moduleConfigs = {
   products: {table:"hb_products", title:"Products / stock", fields:[
     ["name","Product name","text",true],["sku","SKU / code","text",false],["quantity","Quantity","number",true],["unit_cost","Unit cost (KES)","number",true],["selling_price","Selling price (KES)","number",true]]},
   invoices: {table:"hb_invoices", title:"Invoices", fields:[
-    ["invoice_number","Invoice number","text",true],["status","Status","select",true,["draft","sent","part_paid","paid","overdue","cancelled"]],["subtotal","Subtotal (KES)","number",true],["tax_amount","Tax (KES)","number",true],["total_amount","Total (KES)","number",true],["issue_date","Issue date","date",true],["due_date","Due date","date",false]]}
+    ["invoice_number","Invoice number","text",true],["status","Status","select",true,["draft","sent","part_paid","paid","overdue","cancelled"]],["subtotal","Subtotal (KES)","number",true],["tax_amount","Tax (KES)","number",true],["total_amount","Total (KES)","number",true],["issue_date","Issue date","date",true],["due_date","Due date","date",false]]},
+  suppliers: {table:"hb_suppliers", title:"Suppliers", fields:[
+    ["name","Supplier name","text",true],["email","Email","email",false],["phone","Phone","tel",false],["notes","Notes","text",false]]},
+  jobs: {table:"hb_jobs", title:"Jobs & services", fields:[
+    ["name","Job / service name","text",true],["customer_name","Customer name","text",false],["status","Job status","select",true,["new","in_progress","waiting_payment","completed","cancelled"]],["quoted_amount","Quoted amount (KES)","number",true],["paid_amount","Amount received (KES)","number",true],["due_date","Due date","date",false],["notes","Notes","text",false]]},
+  reminders: {table:"hb_reminders", title:"Bills & reminders", fields:[
+    ["title","Reminder title","text",true],["amount","Amount (KES)","number",false],["due_date","Due date","date",true],["status","Status","select",true,["pending","completed","dismissed"]],["notes","Notes","text",false]]}
 };
 let currentModule = "budgets";
 let editingModuleRecord = null;
@@ -443,7 +464,13 @@ async function loadModuleRows() {
   const cfg=moduleConfigs[currentModule];
   $("moduleRows").innerHTML='<p>Loading records…</p>';
   try {
-    const {data,error}=await db.from(cfg.table).select("*").eq("user_id",activeUser.id).order("created_at",{ascending:false}).limit(100);
+    let moduleQuery = db.from(cfg.table).select("*").eq("user_id",activeUser.id);
+    if (activeWorkspaceId) {
+      moduleQuery = activeWorkspaceType === "personal"
+        ? moduleQuery.or("workspace_id.eq."+activeWorkspaceId+",workspace_id.is.null")
+        : moduleQuery.eq("workspace_id",activeWorkspaceId);
+    }
+    const {data,error}=await moduleQuery.order("created_at",{ascending:false}).limit(100);
     if(error) throw error;
     if (currentModule === "budgets") {
       const total = (data || []).reduce((sum, row) => sum + (Number(row.amount) || 0), 0);
@@ -483,13 +510,14 @@ async function saveModuleRecord(event) {
   if(!activeUser)return;
   const cfg=moduleConfigs[currentModule];
   const payload={user_id:activeUser.id};
-  if(["budgets","debts","savings","products","invoices"].includes(currentModule)) payload.currency="KES";
+  if (activeWorkspaceId) payload.workspace_id = activeWorkspaceId;
+  if(["budgets","debts","savings","products","invoices","jobs","reminders"].includes(currentModule)) payload.currency="KES";
   cfg.fields.forEach(field=>{
     const el=$("mf_"+field[0]);
     if(!el)return;
     const value=el.value.trim();
     if(value!=="") payload[field[0]]=field[2]==="number"?Number(value):value;
-    else if(["category","due_date","target_date","notes","email","phone","sku"].includes(field[0])) payload[field[0]]=null;
+    else if(["category","due_date","target_date","notes","email","phone","sku","customer_name"].includes(field[0])) payload[field[0]]=null;
   });
   $("moduleSave").disabled=true;
   try {
