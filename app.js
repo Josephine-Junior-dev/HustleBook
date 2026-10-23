@@ -406,26 +406,40 @@ db.auth.onAuthStateChange((event, session) => {
 
 /* Fixed bottom navigation for phone users */
 function navigateApp(section) {
-  if (!activeUser) return;
+  if (!activeUser) {
+    $("authOverlay")?.scrollIntoView({behavior:"smooth",block:"start"});
+    return;
+  }
   document.querySelectorAll("#mobileAppNav [data-app-nav]").forEach(button => {
-    button.classList.toggle("active", button.dataset.appNav === section);
+    const active = button.dataset.appNav === section;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-current", active ? "page" : "false");
   });
+
   if (section === "home") {
-    document.querySelector(".app-welcome")?.scrollIntoView({behavior:"smooth",block:"start"});
+    window.scrollTo({top:0,behavior:"smooth"});
     return;
   }
   if (section === "transactions") {
     $("txPanel")?.scrollIntoView({behavior:"smooth",block:"start"});
     return;
   }
-  if (section === "budgets" || section === "debts" || section === "more") {
-    currentModule = section === "budgets" ? "budgets" : section === "debts" ? "debts" : "savings";
-    editingModuleRecord = null;
-    renderModuleShell();
-    loadModuleRows();
-    $("moduleCrud")?.scrollIntoView({behavior:"smooth",block:"start"});
-  }
+
+  const nextModule = section === "budgets" ? "budgets"
+    : section === "debts" ? "debts"
+    : "savings";
+  currentModule = nextModule;
+  editingModuleRecord = null;
+  renderModuleShell();
+  loadModuleRows();
+  $("moduleCrud")?.scrollIntoView({behavior:"smooth",block:"start"});
 }
-document.querySelectorAll("#mobileAppNav [data-app-nav]").forEach(button => {
-  button.addEventListener("click", () => navigateApp(button.dataset.appNav));
+
+/* Delegated click handling keeps navigation working after UI rerenders. */
+document.addEventListener("click", event => {
+  const button = event.target.closest("#mobileAppNav [data-app-nav]");
+  if (!button) return;
+  event.preventDefault();
+  event.stopPropagation();
+  navigateApp(button.dataset.appNav);
 });
