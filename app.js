@@ -277,6 +277,107 @@ $("signOutBtn").addEventListener("click", async () => {
   }
 });
 
+
+// CRUD manager for the other user-owned MVP modules.
+const moduleConfigs = {
+  budgets: {table:"hb_budgets", title:"Budgets", fields:[
+    ["name","Budget name","text",true],["category","Category","text",false],["amount","Budget amount (KES)","number",true],["period","Period","select",true,["weekly","monthly","yearly"]],["starts_on","Start date","date",true]]},
+  debts: {table:"hb_debts", title:"Debts", fields:[
+    ["name","Person / debt name","text",true],["debt_type","Debt direction","select",true,["owed_by_me","owed_to_me"]],["original_amount","Original amount (KES)","number",true],["balance_amount","Remaining balance (KES)","number",true],["due_date","Due date","date",false],["notes","Notes","text",false]]},
+  savings: {table:"hb_savings_goals", title:"Savings goals", fields:[
+    ["name","Goal name","text",true],["target_amount","Target amount (KES)","number",true],["saved_amount","Amount saved (KES)","number",true],["target_date","Target date","date",false]]},
+  customers: {table:"hb_customers", title:"Customers", fields:[
+    ["name","Customer name","text",true],["email","Email","email",false],["phone","Phone","tel",false],["notes","Notes","text",false]]},
+  products: {table:"hb_products", title:"Products / stock", fields:[
+    ["name","Product name","text",true],["sku","SKU / code","text",false],["quantity","Quantity","number",true],["unit_cost","Unit cost (KES)","number",true],["selling_price","Selling price (KES)","number",true]]},
+  invoices: {table:"hb_invoices", title:"Invoices", fields:[
+    ["invoice_number","Invoice number","text",true],["status","Status","select",true,["draft","sent","part_paid","paid","overdue","cancelled"]],["subtotal","Subtotal (KES)","number",true],["tax_amount","Tax (KES)","number",true],["total_amount","Total (KES)","number",true],["issue_date","Issue date","date",true],["due_date","Due date","date",false]]}
+};
+let currentModule = "budgets";
+let editingModuleRecord = null;
+function moduleValue(field, value) {
+  if (value === null || value === undefined) return "";
+  return String(value);
+}
+function renderModuleShell() {
+  const host = $("moduleCrud");
+  if (!host) return;
+  const cfg = moduleConfigs[currentModule];
+  host.innerHTML = '<h2 style="margin:0 0 12px;font-size:21px">' + escapeText(cfg.title) + '</h2>' +
+    '<label for="modulePicker" style="display:block;font-size:12px;font-weight:750;margin-bottom:5px">Manage another area</label>' +
+    '<select id="modulePicker" style="width:100%;padding:12px;border:1px solid #dce5de;border-radius:10px;background:white;font:inherit">' +
+    Object.keys(moduleConfigs).map(key => '<option value="' + key + '"' + (key===currentModule?' selected':'') + '>' + escapeText(moduleConfigs[key].title) + '</option>').join("") +
+    '</select><form id="moduleForm" class="tx-form" style="margin-top:12px">' +
+    cfg.fields.map(field => '<div><label for="mf_' + field[0] + '">' + escapeText(field[1]) + '</label>' +
+      (field[2] === "select" ? '<select id="mf_' + field[0] + '" ' + (field[3]?'required':'') + '>' + field[4].map(opt=>'<option value="'+escapeText(opt)+'">'+escapeText(opt.replaceAll("_"," "))+'</option>').join("") + '</select>' :
+      '<input id="mf_' + field[0] + '" type="' + field[2] + '" ' + (field[2]==="number"?'min="0" step="0.01"':'') + (field[3]?' required':'') + ' placeholder="' + escapeText(field[1]) + '">') + '</div>').join("") +
+    '<div class="full" style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-green" id="moduleSave" type="submit">Save record</button><button class="btn btn-outline" id="moduleCancel" type="button">Clear form</button></div></form>' +
+    '<p id="moduleMsg" class="auth-msg" aria-live="polite"></p><div id="moduleRows" style="display:grid;gap:9px;margin-top:12px"></div>';
+  $("modulePicker").addEventListener("change", () => { currentModule=$("modulePicker").value; editingModuleRecord=null; renderModuleShell(); loadModuleRows(); });
+  $("moduleCancel").addEventListener("click", () => { editingModuleRecord=null; renderModuleShell(); loadModuleRows(); });
+  $("moduleForm").addEventListener("submit", saveModuleRecord);
+}
+async function loadModuleRows() {
+  if (!activeUser || !$("moduleRows")) return;
+  const cfg=moduleConfigs[currentModule];
+  $("moduleRows").innerHTML='<p>Loading records…</p>';
+  try {
+    const {data,error}=await db.from(cfg.table).select("*").eq("user_id",activeUser.id).order("created_at",{ascending:false}).limit(100);
+    if(error) throw error;
+    $("moduleRows").innerHTML=(data||[]).length ? data.map(row => {
+      const summary=cfg.fields.map(field=>field[1]+": "+(row[field[0]] ?? "—")).join(" · ");
+      return '<article style="border:1px solid #e2e9e3;border-radius:12px;padding:13px;overflow-wrap:anywhere"><strong>'+escapeText(row.name || row.invoice_number || cfg.title.slice(0,-1))+'</strong><p style="font-size:12px;color:#68766d;margin:6px 0 10px">'+escapeText(summary)+'</p><button class="btn btn-outline" type="button" data-module-edit="'+escapeText(row.id)+'">Edit</button> <button class="btn btn-outline" type="button" data-module-delete="'+escapeText(row.id)+'">Delete</button></article>';
+    }).join("") : '<p>No records yet.</p>';
+    $("moduleRows").querySelectorAll("[data-module-edit]").forEach(btn=>btn.addEventListener("click",()=>{
+      const row=(data||[]).find(item=>item.id===btn.dataset.moduleEdit);
+      if(!row)return;
+      editingModuleRecord=row.id;
+      cfg.fields.forEach(field=>{const el=$("mf_"+field[0]);if(el)el.value=moduleValue(field[0],row[field[0]]);});
+      $("moduleSave").textContent="Update record";
+      setMessage("moduleMsg","Editing record. Save to apply changes.");
+      $("moduleCrud").scrollIntoView({behavior:"smooth",block:"start"});
+    }));
+    $("moduleRows").querySelectorAll("[data-module-delete]").forEach(btn=>btn.addEventListener("click",async()=>{
+      if(!window.confirm("Delete this record permanently?"))return;
+      btn.disabled=true;
+      try {
+        const {error}=await db.from(cfg.table).delete().eq("id",btn.dataset.moduleDelete).eq("user_id",activeUser.id);
+        if(error)throw error;
+        setMessage("moduleMsg","Record deleted.");
+        await loadModuleRows();
+      } catch(error){setMessage("moduleMsg","Delete failed: "+(error.message||"Try again."),true);}
+      finally{btn.disabled=false;}
+    }));
+  } catch(error) {
+    $("moduleRows").innerHTML='<p>Could not load records: '+escapeText(error.message||"Please try again.")+'</p>';
+  }
+}
+async function saveModuleRecord(event) {
+  event.preventDefault();
+  if(!activeUser)return;
+  const cfg=moduleConfigs[currentModule];
+  const payload={user_id:activeUser.id,currency:"KES"};
+  cfg.fields.forEach(field=>{
+    const el=$("mf_"+field[0]);
+    if(!el)return;
+    const value=el.value.trim();
+    if(value!=="") payload[field[0]]=field[2]==="number"?Number(value):value;
+    else if(["category","due_date","target_date","notes","email","phone","sku"].includes(field[0])) payload[field[0]]=null;
+  });
+  $("moduleSave").disabled=true;
+  try {
+    const result=editingModuleRecord
+      ? await db.from(cfg.table).update(payload).eq("id",editingModuleRecord).eq("user_id",activeUser.id)
+      : await db.from(cfg.table).insert(payload);
+    if(result.error)throw result.error;
+    editingModuleRecord=null;
+    setMessage("moduleMsg","Record saved successfully.");
+    renderModuleShell();
+    await loadModuleRows();
+  } catch(error){setMessage("moduleMsg","Save failed: "+(error.message||"Please try again."),true);}
+  finally{if($("moduleSave"))$("moduleSave").disabled=false;}
+}
+
 try {
   const { data, error } = await db.auth.getSession();
   if (error) throw error;
