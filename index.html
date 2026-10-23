@@ -14,30 +14,30 @@
     @media(max-width:520px){.wrap{width:min(100% - 28px,1120px)}nav{height:66px}.brand{font-size:19px}.navactions .btn{padding:10px 12px;font-size:12px}.hero{padding-top:38px}.hero p{font-size:15px}h1{font-size:43px}.hero-buttons .btn{width:100%}.mock{padding:14px}.balance{padding:17px}.amount{font-size:27px}.section-head{margin-bottom:25px}.features{grid-template-columns:1fr}.feature{padding:21px}.security{padding:24px}.security-list{grid-template-columns:1fr}.cta{padding:28px 20px}.foot{flex-direction:column}}
   </style>
 <style id="hustlebook-vibrant-theme">
-:root{--navy:#201044;--navy2:#38206f;--green:#7657ff;--mint:#e9e4ff;--ink:#211a35;--muted:#746b89;--line:#e8e1f1;--paper:#faf7ff;--white:#fff}
-body{background:#fff;color:#211a35}
-header{background:radial-gradient(ellipse at 82% 15%,#49318a 0%,transparent 42%),linear-gradient(135deg,#1c1038 0%,#29205a 58%,#153d55 100%)}
-.logo{background:linear-gradient(135deg,#8b5cf6,#25c9b7)!important;box-shadow:0 8px 28px #8b5cf64a!important}
-.btn-green{background:linear-gradient(120deg,#7657ff,#a14dff 60%,#19b8ad)!important;color:#fff!important;box-shadow:0 9px 26px #7657ff45!important}
-.btn-green:hover{box-shadow:0 12px 32px #7657ff5c!important}
-h1 span{background:linear-gradient(90deg,#b6a4ff,#42e0c4);-webkit-background-clip:text;background-clip:text;color:transparent}
-.dot{background:#42e0c4!important;box-shadow:0 0 12px #42e0c4}
-.eyebrow{border-color:#ffffff35;background:#ffffff12}
-.mock-shell{box-shadow:0 35px 90px #10052655}
-.balance{background:linear-gradient(135deg,#29144f,#3f2c85 65%,#087f83)!important}
-.positive,.check{color:#42d9bd!important}
-.section-soft{background:linear-gradient(180deg,#faf7ff,#f2f8ff)!important}
-.kicker{color:#7657ff!important}
-.feature{box-shadow:0 8px 28px #2b165b0a;transition:transform .2s,box-shadow .2s}
-.feature:hover{transform:translateY(-4px);box-shadow:0 16px 36px #2b165b14}
-.feature-icon{background:linear-gradient(135deg,#eee8ff,#e0fbf6)!important}
-.pill{background:linear-gradient(135deg,#fff,#faf7ff)}
-.security{background:radial-gradient(ellipse at 90% 10%,#3e2c78 0%,transparent 42%),linear-gradient(135deg,#1c1038,#153d55)!important}
-.cta{background:radial-gradient(ellipse at top right,#e7e0ff,transparent 60%),linear-gradient(135deg,#f5f0ff,#e9fbf7)!important;border-color:#e5dcff!important}
-footer{background:#160d2b!important}
-.auth-overlay{background:#160d2bdc!important}
-.app-top{background:linear-gradient(110deg,#201044,#38206f 70%,#087f83)!important}
-.auth-card .logo{background:linear-gradient(135deg,#8b5cf6,#25c9b7)!important}
+:root{--navy:#101820;--navy2:#202a31;--green:#00a859;--mint:#e5f8ee;--ink:#17211b;--muted:#68756d;--line:#e0e8e2;--paper:#f4f7f5;--white:#fff}
+body{background:#fff;color:#17211b}
+header{background:radial-gradient(ellipse at 82% 15%,#263b31 0%,transparent 42%),linear-gradient(135deg,#101820 0%,#17251e 65%,#0b3d2a 100%)}
+.logo{background:#00a859!important;box-shadow:0 8px 28px #00a85935!important}
+.btn-green{background:#00a859!important;color:#fff!important;box-shadow:0 8px 24px #00a85935!important}
+.btn-green:hover{background:#008f4c!important;box-shadow:0 12px 32px #00a85945!important}
+h1 span{color:#35d07f}
+.dot{background:#35d07f!important;box-shadow:0 0 12px #35d07f}
+.eyebrow{border-color:#ffffff30;background:#ffffff0c}
+.mock-shell{box-shadow:0 35px 90px #0005}
+.balance{background:linear-gradient(135deg,#101820,#1c3929 75%,#087f4f)!important}
+.positive,.check{color:#35c77a!important}
+.section-soft{background:linear-gradient(180deg,#f4f7f5,#edf4ef)!important}
+.kicker{color:#008f4c!important}
+.feature{box-shadow:0 8px 28px #15271b0a;transition:transform .2s,box-shadow .2s}
+.feature:hover{transform:translateY(-4px);box-shadow:0 16px 36px #15271b14}
+.feature-icon{background:#e5f8ee!important}
+.pill{background:#fff}
+.security{background:radial-gradient(ellipse at 90% 10%,#263b31 0%,transparent 42%),linear-gradient(135deg,#101820,#0b3d2a)!important}
+.cta{background:radial-gradient(ellipse at top right,#dff6e8,transparent 60%),linear-gradient(135deg,#f4f7f5,#e8f8ee)!important;border-color:#d6e9dc!important}
+footer{background:#101820!important}
+.auth-overlay{background:#101820dc!important}
+.app-top{background:linear-gradient(110deg,#101820,#202a31 70%,#087f4f)!important}
+.auth-card .logo{background:#00a859!important}
 @media(prefers-reduced-motion:reduce){.feature,.btn{transition:none}}
 </style>
 </head>
@@ -151,7 +151,7 @@ document.querySelectorAll("[data-auth]").forEach(el=>el.addEventListener("click"
 $("authClose").addEventListener("click",()=>$("authOverlay").style.display="none");
 $("authSwitch").addEventListener("click",e=>{e.preventDefault();showAuth(authMode==="login"?"signup":"login")});
 $("authForm").addEventListener("submit",async e=>{e.preventDefault();const email=$("authEmail").value.trim();const password=$("authPassword").value;$("authSubmit").disabled=true;$("authMsg").textContent="Please wait…";try{if(authMode==="signup"){const {data,error}=await db.auth.signUp({email,password,options:{data:{display_name:$("authName").value.trim()}}});if(error)throw error;if(data.session&&data.user)showApp(data.user);else $("authMsg").textContent="Account created. Check your email to confirm, then log in."; }else{const {data,error}=await db.auth.signInWithPassword({email,password});if(error)throw error;showApp(data.user)}}catch(err){$("authMsg").textContent=err.message||"Something went wrong. Please try again."}finally{$("authSubmit").disabled=false}});
-async function loadTransactions(){if(!activeUser)return;$("txRows").innerHTML='<tr><td colspan="4">Loading your records…</td></tr>';const {data,error}=await db.from("hb_transactions").select("id,transaction_type,amount,currency,category,description,transaction_date").order("transaction_date",{ascending:false}).limit(100);if(error){$("txRows").innerHTML='<tr><td colspan="4">Could not load transactions: '+escapeText(error.message)+'</td></tr>';return}const rows=data||[];let income=0,expense=0;rows.forEach(t=>{if(t.transaction_type==="income")income+=Number(t.amount);else expense+=Number(t.amount)});$("sumIncome").textContent=money(income);$("sumExpense").textContent=money(expense);$("sumBalance").textContent=money(income-expense);$("txRows").innerHTML=rows.length?rows.map(t=>'<tr><td>'+escapeText(t.transaction_date||"")+'</td><td><b>'+escapeText(t.description||t.category||"Transaction")+'</b><br><span style="color:#68758d">'+escapeText(t.category||"Other")+'</span></td><td>'+escapeText(t.transaction_type)+'</td><td style="font-weight:800;color:'+(t.transaction_type==="income"?"#087f67":"#b54747")+'">'+(t.transaction_type==="income"?"+":"−")+money(t.amount)+'</td></tr>').join(""):'<tr><td colspan="4">No transactions yet. Add your first one above.</td></tr>'}
+async function loadTransactions(){if(!activeUser)return;$("txRows").innerHTML='<tr><td colspan="4">Loading your records…</td></tr>';const {data,error}=await db.from("hb_transactions").select("id,transaction_type,amount,currency,category,description,transaction_date").eq("user_id",activeUser.id).order("transaction_date",{ascending:false}).limit(100);if(error){$("txRows").innerHTML='<tr><td colspan="4">Could not load transactions: '+escapeText(error.message)+'</td></tr>';return}const rows=data||[];let income=0,expense=0;rows.forEach(t=>{if(t.transaction_type==="income")income+=Number(t.amount);else expense+=Number(t.amount)});$("sumIncome").textContent=money(income);$("sumExpense").textContent=money(expense);$("sumBalance").textContent=money(income-expense);$("txRows").innerHTML=rows.length?rows.map(t=>'<tr><td>'+escapeText(t.transaction_date||"")+'</td><td><b>'+escapeText(t.description||t.category||"Transaction")+'</b><br><span style="color:#68758d">'+escapeText(t.category||"Other")+'</span></td><td>'+escapeText(t.transaction_type)+'</td><td style="font-weight:800;color:'+(t.transaction_type==="income"?"#087f67":"#b54747")+'">'+(t.transaction_type==="income"?"+":"−")+money(t.amount)+'</td></tr>').join(""):'<tr><td colspan="4">No transactions yet. Add your first one above.</td></tr>'}
 function escapeText(s){return String(s??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]))}
 $("txForm").addEventListener("submit",async e=>{e.preventDefault();if(!activeUser){showAuth("login");return}const payload={user_id:activeUser.id,transaction_type:$("txType").value,amount:Number($("txAmount").value),currency:"KES",category:$("txCategory").value,description:$("txDescription").value.trim()||$("txCategory").value,transaction_date:$("txDate").value};$("txSubmit").disabled=true;$("txMsg").textContent="Saving…";try{const {error}=await db.from("hb_transactions").insert(payload);if(error)throw error;$("txMsg").textContent="Saved successfully."; $("txAmount").value="";$("txDescription").value="";await loadTransactions()}catch(err){$("txMsg").textContent="Save failed: "+(err.message||"Please try again.")}finally{$("txSubmit").disabled=false}});
 $("addTxJump").addEventListener("click",()=>$("txPanel").scrollIntoView({behavior:"smooth"}));
