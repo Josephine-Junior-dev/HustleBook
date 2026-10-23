@@ -82,6 +82,23 @@ $("authSwitch").addEventListener("click", event => {
   showAuth(authMode === "login" ? "signup" : "login");
 });
 
+
+$("googleSignIn").addEventListener("click", async () => {
+  const button = $("googleSignIn");
+  button.disabled = true;
+  setMessage("authMsg", "Connecting to Google…");
+  try {
+    const { error } = await db.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: window.location.origin + window.location.pathname }
+    });
+    if (error) throw error;
+  } catch (error) {
+    setMessage("authMsg", "Google sign-in could not start: " + (error.message || "Please try again."), true);
+    button.disabled = false;
+  }
+});
+
 $("authForm").addEventListener("submit", async event => {
   event.preventDefault();
   if (authRequestInProgress) return;
