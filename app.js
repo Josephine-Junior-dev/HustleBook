@@ -13,6 +13,7 @@ let activeUser = null;
 let loadingTransactions = false;
 let savedTotals = { income: 0, expense: 0 };
 let authRequestInProgress = false;
+let editingTransactionId = null;
 
 const money = value => new Intl.NumberFormat("en-KE", {
   style: "currency", currency: "KES", maximumFractionDigits: 2
@@ -133,7 +134,7 @@ $("authForm").addEventListener("submit", async event => {
 async function loadTransactions() {
   if (!activeUser || loadingTransactions) return;
   loadingTransactions = true;
-  $("txRows").innerHTML = '<tr><td colspan="4">Loading your records…</td></tr>';
+  $("txRows").innerHTML = '<tr><td colspan="5">Loading your records…</td></tr>';
   try {
     const { data, error } = await db
       .from("hb_transactions")
@@ -161,10 +162,10 @@ async function loadTransactions() {
         escapeText(row.category || "Other") + '</span></td><td>' +
         escapeText(row.transaction_type) + '</td><td style="font-weight:800;color:' +
         (isIncome ? "#218047" : "#b54747") + '">' + (isIncome ? "+" : "−") +
-        money(row.amount) + '</td></tr>';
-    }).join("") : '<tr><td colspan="4">No transactions yet. Add your first one above.</td></tr>';
+        money(row.amount) + '</td><td><button type="button" class="btn btn-outline" data-edit-tx="' + escapeText(row.id) + '">Edit</button> <button type="button" class="btn btn-outline" data-delete-tx="' + escapeText(row.id) + '">Delete</button></td></tr>';
+    }).join("") : '<tr><td colspan="5">No transactions yet. Add your first one above.</td></tr>';
   } catch (error) {
-    $("txRows").innerHTML = '<tr><td colspan="4">Could not load transactions: ' +
+    $("txRows").innerHTML = '<tr><td colspan="5">Could not load transactions: ' +
       escapeText(error.message || "Please try again.") + '</td></tr>';
     setMessage("txMsg", "Your account is open, but transactions could not be loaded. Check the hb_transactions table and its authenticated-user RLS policies.", true);
   } finally {
@@ -172,6 +173,42 @@ async function loadTransactions() {
   }
 }
 
+$("txRows").addEventListener("click", async event => {
+  const edit = event.target.closest("[data-edit-tx]");
+  const remove = event.target.closest("[data-delete-tx]");
+  if (!activeUser) return;
+  if (edit) {
+    try {
+      const { data, error } = await db.from("hb_transactions").select("*").eq("id", edit.dataset.editTx).eq("user_id", activeUser.id).single();
+      if (error) throw error;
+      editingTransactionId = data.id;
+      $("txType").value = data.transaction_type;
+      $("txAmount").value = data.amount;
+      $("txCategory").value = data.category || "Other";
+      $("txDate").value = data.transaction_date || localDate();
+      $("txDescription").value = data.description || "";
+      $("txSubmit").textContent = "Update transaction";
+      setMessage("txMsg", "Editing transaction. Save to apply changes.");
+      renderTotals();
+      $("txPanel").scrollIntoView({behavior:"smooth",block:"start"});
+    } catch (error) { setMessage("txMsg", "Could not open transaction: " + (error.message || "Try again."), true); }
+  }
+  if (remove && window.confirm("Delete this transaction permanently?")) {
+    remove.disabled = true;
+    try {
+      const { error } = await db.from("hb_transactions").delete().eq("id", remove.dataset.deleteTx).eq("user_id", activeUser.id);
+      if (error) throw error;
+      if (editingTransactionId === remove.dataset.deleteTx) {
+        editingTransactionId = null;
+        $("txForm").reset();
+        $("txSubmit").textContent = "Save transaction";
+      }
+      setMessage("txMsg", "Transaction deleted.");
+      await loadTransactions();
+    } catch (error) { setMessage("txMsg", "Delete failed: " + (error.message || "Try again."), true); }
+    finally { remove.disabled = false; }
+  }
+});
 $("txAmount").addEventListener("input", renderTotals);
 $("txType").addEventListener("change", renderTotals);
 $("txForm").addEventListener("submit", async event => {
@@ -194,10 +231,15 @@ $("txForm").addEventListener("submit", async event => {
   $("txSubmit").disabled = true;
   setMessage("txMsg", "Saving transaction…");
   try {
-    const { error } = await db.from("hb_transactions").insert(payload);
+    const result = editingTransactionId
+      ? await db.from("hb_transactions").update(payload).eq("id", editingTransactionId).eq("user_id", activeUser.id)
+      : await db.from("hb_transactions").insert(payload);
+    const { error } = result;
     if (error) throw error;
     $("txAmount").value = "";
     $("txDescription").value = "";
+    editingTransactionId = null;
+    $("txSubmit").textContent = "Save transaction";
     renderTotals();
     setMessage("txMsg", "Transaction saved successfully.");
     await loadTransactions();
