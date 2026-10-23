@@ -397,21 +397,25 @@ function renderModuleShell() {
   const host = $("moduleCrud");
   if (!host) return;
   const cfg = moduleConfigs[currentModule];
-  host.innerHTML = '<h2 style="margin:0 0 12px;font-size:21px">' + escapeText(cfg.title) + '</h2>' +
+  const moduleSwitcher = currentModule === "budgets" ? "" :
     '<p style="font-size:13px;color:#68766d;margin:0 0 10px">Choose a tool below. Each area has its own saved records.</p>' +
     '<div id="moduleNav" style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px">' +
     Object.keys(moduleConfigs).map(key => '<button type="button" data-open-module="' + key + '" class="btn ' + (key===currentModule?'btn-green':'btn-outline') + '" style="padding:9px 12px;font-size:12px">' + escapeText(moduleConfigs[key].title) + '</button>').join("") +
     '</div><label for="modulePicker" style="display:block;font-size:12px;font-weight:750;margin-bottom:5px">Or choose an area</label>' +
     '<select id="modulePicker" style="width:100%;padding:12px;border:1px solid #dce5de;border-radius:10px;background:white;font:inherit">' +
     Object.keys(moduleConfigs).map(key => '<option value="' + key + '"' + (key===currentModule?' selected':'') + '>' + escapeText(moduleConfigs[key].title) + '</option>').join("") +
-    '</select><form id="moduleForm" class="tx-form" style="margin-top:12px">' +
+    '</select>';
+  host.innerHTML = '<h2 style="margin:0 0 12px;font-size:21px">' + escapeText(cfg.title) + '</h2>' +
+    moduleSwitcher +
+    (currentModule === "budgets" ? '<div id="budgetTotalCard" style="background:#f0f8f2;border:1px solid #d6e9da;border-radius:12px;padding:15px;margin:0 0 12px"><div style="font-size:13px;color:#52665a">Total planned budget</div><strong id="budgetTotalValue" style="display:block;font-size:25px;margin-top:5px">KSh 0.00</strong><div id="budgetCount" style="font-size:12px;color:#68766d;margin-top:4px">0 budgets</div></div>' : '') +
+    '<form id="moduleForm" class="tx-form" style="margin-top:12px">'
     cfg.fields.map(field => '<div><label for="mf_' + field[0] + '">' + escapeText(field[1]) + '</label>' +
       (field[2] === "select" ? '<select id="mf_' + field[0] + '" ' + (field[3]?'required':'') + '>' + field[4].map(opt=>'<option value="'+escapeText(opt)+'">'+escapeText(({owed_by_me:"I owe someone",owed_to_me:"Someone owes me"}[opt] || opt.replaceAll("_"," ")))+'</option>').join("") + '</select>' :
       '<input id="mf_' + field[0] + '" type="' + field[2] + '" ' + (field[2]==="number"?'min="0" step="0.01"':'') + (field[3]?' required':'') + ' placeholder="' + escapeText(field[1]) + '">') + '</div>').join("") +
     '<div class="full" style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-green" id="moduleSave" type="submit">Save record</button><button class="btn btn-outline" id="moduleCancel" type="button">Clear form</button></div></form>' +
     '<p id="moduleMsg" class="auth-msg" aria-live="polite"></p><div id="moduleRows" style="display:grid;gap:9px;margin-top:12px"></div>';
-  $("moduleNav").querySelectorAll("[data-open-module]").forEach(button => button.addEventListener("click", () => { currentModule=button.dataset.openModule; editingModuleRecord=null; renderModuleShell(); loadModuleRows(); }));
-  $("modulePicker").addEventListener("change", () => { currentModule=$("modulePicker").value; editingModuleRecord=null; renderModuleShell(); loadModuleRows(); });
+  $("moduleNav")?.querySelectorAll("[data-open-module]").forEach(button => button.addEventListener("click", () => { currentModule=button.dataset.openModule; editingModuleRecord=null; renderModuleShell(); loadModuleRows(); }));
+  $("modulePicker")?.addEventListener("change", () => { currentModule=$("modulePicker").value; editingModuleRecord=null; renderModuleShell(); loadModuleRows(); });
   $("moduleCancel").addEventListener("click", () => { editingModuleRecord=null; renderModuleShell(); loadModuleRows(); });
   $("moduleForm").addEventListener("submit", saveModuleRecord);
 }
@@ -422,6 +426,11 @@ async function loadModuleRows() {
   try {
     const {data,error}=await db.from(cfg.table).select("*").eq("user_id",activeUser.id).order("created_at",{ascending:false}).limit(100);
     if(error) throw error;
+    if (currentModule === "budgets") {
+      const total = (data || []).reduce((sum, row) => sum + (Number(row.amount) || 0), 0);
+      if ($("budgetTotalValue")) $("budgetTotalValue").textContent = money(total);
+      if ($("budgetCount")) $("budgetCount").textContent = (data || []).length + ((data || []).length === 1 ? " budget" : " budgets");
+    }
     $("moduleRows").innerHTML=(data||[]).length ? data.map(row => {
       const summary=cfg.fields.map(field=>field[1]+": "+(row[field[0]] ?? "—")).join(" · ");
       return '<article style="border:1px solid #e2e9e3;border-radius:12px;padding:13px;overflow-wrap:anywhere"><strong>'+escapeText(row.name || row.invoice_number || cfg.title.slice(0,-1))+'</strong><p style="font-size:12px;color:#68766d;margin:6px 0 10px">'+escapeText(summary)+'</p><div class="action-icons"><button class="icon-action edit-icon" type="button" aria-label="Edit record" title="Edit record" data-module-edit="'+escapeText(row.id)+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg></button><button class="icon-action delete-icon" type="button" aria-label="Delete record" title="Delete record" data-module-delete="'+escapeText(row.id)+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m2 0-1 14H7L6 6m4 4v6m4-6v6"/></svg></button></div></article>';
