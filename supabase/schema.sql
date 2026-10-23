@@ -175,7 +175,12 @@ revoke all on table public.hb_profiles, public.hb_workspaces, public.hb_transact
 grant select, insert, update, delete on table public.hb_profiles, public.hb_workspaces,
   public.hb_transactions, public.hb_budgets, public.hb_debts, public.hb_savings_goals,
   public.hb_customers, public.hb_products, public.hb_invoices, public.hb_invoice_items,
-  public.hb_payments, public.hb_subscriptions, public.hb_notifications to authenticated;
+  public.hb_notifications to authenticated;
+
+-- Payment and subscription records are read-only from the browser.
+-- A trusted backend must create/update these after verifying provider events.
+revoke all on table public.hb_payments, public.hb_subscriptions from authenticated;
+grant select on table public.hb_payments, public.hb_subscriptions to authenticated;
 
 alter table public.hb_profiles enable row level security;
 alter table public.hb_workspaces enable row level security;
@@ -206,9 +211,11 @@ begin
     execute format('drop policy if exists %I on public.%I', tbl || '_update_own', tbl);
     execute format('drop policy if exists %I on public.%I', tbl || '_delete_own', tbl);
     execute format('create policy %I on public.%I for select to authenticated using (user_id = (select auth.uid()))', tbl || '_select_own', tbl);
-    execute format('create policy %I on public.%I for insert to authenticated with check (user_id = (select auth.uid()))', tbl || '_insert_own', tbl);
-    execute format('create policy %I on public.%I for update to authenticated using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()))', tbl || '_update_own', tbl);
-    execute format('create policy %I on public.%I for delete to authenticated using (user_id = (select auth.uid()))', tbl || '_delete_own', tbl);
+    if tbl not in ('hb_payments', 'hb_subscriptions') then
+      execute format('create policy %I on public.%I for insert to authenticated with check (user_id = (select auth.uid()))', tbl || '_insert_own', tbl);
+      execute format('create policy %I on public.%I for update to authenticated using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()))', tbl || '_update_own', tbl);
+      execute format('create policy %I on public.%I for delete to authenticated using (user_id = (select auth.uid()))', tbl || '_delete_own', tbl);
+    end if;
   end loop;
 end $$;
 
@@ -216,5 +223,5 @@ end $$;
 -- 1) Run this script in Supabase SQL Editor only after reviewing it.
 -- 2) This is a user-owned MVP foundation. Shared household/team access needs membership-based policies before those features are enabled.
 -- 3) Do not store full card numbers or CVVs here.
--- 4) Subscription/payment status must be updated only by a trusted server-side integration after verifying provider events.
+-- 4) Authenticated browser clients can only read their payment/subscription rows; a trusted server-side integration must create/update them after verifying provider events.
 -- 5) Do not add service_role or secret API keys to frontend code.
