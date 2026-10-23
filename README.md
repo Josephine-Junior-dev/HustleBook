@@ -49,3 +49,10 @@ The SQL foundation is in `supabase/schema.sql`.
 ## Important
 
 GitHub Pages only hosts static frontend files; it does not run private server-side code or payment webhooks. Use Supabase Edge Functions or another trusted backend for privileged operations and payment verification.
+
+
+## Workspace/business expansion
+
+Run `supabase/migrations/20261023_workspace_business_modules.sql` in the Supabase SQL Editor after the base schema. It adds workspace scoping to budgets, debts, savings, customers, products and invoices, plus owner-protected Suppliers, Jobs & Services, and Bills & Reminders modules. The frontend exposes these modules and scopes their records to the selected finance area. Existing NULL-workspace records remain visible in Personal only.
+
+Not yet operational: household invitations/shared access, public service-provider marketplace, invoice line-item PDF generation, scheduled email/push delivery, and verified live subscription/payment processing. These require additional membership/verification/server-side work and must be tested before being offered to customers.
