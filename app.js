@@ -44,6 +44,9 @@ function showAuth(mode = "login") {
   $("nameLabel").style.display = mode === "signup" ? "block" : "none";
   $("authName").style.display = mode === "signup" ? "block" : "none";
   $("authName").required = mode === "signup";
+  $("useCaseLabel").style.display = mode === "signup" ? "block" : "none";
+  $("authUseCase").style.display = mode === "signup" ? "block" : "none";
+  $("authUseCase").required = mode === "signup";
   $("authPassword").autocomplete = mode === "signup" ? "new-password" : "current-password";
   $("authSwitch").textContent = mode === "signup"
     ? "Already have an account? Log in"
@@ -96,7 +99,7 @@ $("authForm").addEventListener("submit", async event => {
     if (authMode === "signup") {
       const displayName = $("authName").value.trim();
       const { data, error } = await db.auth.signUp({
-        email, password, options: { data: { display_name: displayName } }
+        email, password, options: { data: { display_name: displayName, use_case: $("authUseCase").value } }
       });
       if (error) throw error;
       if (data.session && data.user) {
@@ -192,7 +195,7 @@ $("txForm").addEventListener("submit", async event => {
     $("txSubmit").disabled = false;
   }
 });
-$("addTxJump").addEventListener("click", () => $("txPanel").scrollIntoView({ behavior: "smooth", block: "start" }));
+function openTransactionForm(type) {\n  if (type) $("txType").value = type;\n  $("txPanel").scrollIntoView({ behavior: "smooth", block: "start" });\n  $("txAmount").focus({ preventScroll: true });\n}\n$("addTxJump").addEventListener("click", () => openTransactionForm());\n$("incomeCard").addEventListener("click", () => openTransactionForm("income"));\n$("expenseCard").addEventListener("click", () => openTransactionForm("expense"));\n$("balanceCard").addEventListener("click", () => $("txRows").closest(".app-panel").scrollIntoView({ behavior: "smooth", block: "start" }));\n["incomeCard","expenseCard","balanceCard"].forEach(id => $(id).addEventListener("keydown", event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); $(id).click(); } }));
 $("signOutBtn").addEventListener("click", async () => {
   $("signOutBtn").disabled = true;
   try {
