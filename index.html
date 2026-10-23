@@ -26,6 +26,16 @@ header{background:#fff;color:var(--ink);border-bottom:1px solid #edf1ed}nav{heig
  #mobileAppNav button:focus-visible{outline:2px solid #27834b;outline-offset:1px}
 }
 
+
+/* Keep the signed-in workspace separate from the marketing landing page. */
+body.app-mode > header,
+body.app-mode > main,
+body.app-mode > footer,
+body.app-mode > section,
+body.app-mode > .landing-page{display:none!important}
+body.app-mode{background:#f8faf8;overflow:hidden}
+body.app-mode #appOverlay{display:block!important;position:fixed;inset:0;z-index:990;overflow-y:auto;background:#f8faf8;padding-bottom:76px}
+body.app-mode .app-wrap{padding-top:22px}
 </style>
 
 <style id="record-action-icon-styles">
