@@ -402,3 +402,30 @@ db.auth.onAuthStateChange((event, session) => {
     $("appOverlay").style.display = "none";
   }
 });
+
+
+/* Fixed bottom navigation for phone users */
+function navigateApp(section) {
+  if (!activeUser) return;
+  document.querySelectorAll("#mobileAppNav [data-app-nav]").forEach(button => {
+    button.classList.toggle("active", button.dataset.appNav === section);
+  });
+  if (section === "home") {
+    document.querySelector(".app-welcome")?.scrollIntoView({behavior:"smooth",block:"start"});
+    return;
+  }
+  if (section === "transactions") {
+    $("txPanel")?.scrollIntoView({behavior:"smooth",block:"start"});
+    return;
+  }
+  if (section === "budgets" || section === "debts" || section === "more") {
+    currentModule = section === "budgets" ? "budgets" : section === "debts" ? "debts" : "savings";
+    editingModuleRecord = null;
+    renderModuleShell();
+    loadModuleRows();
+    $("moduleCrud")?.scrollIntoView({behavior:"smooth",block:"start"});
+  }
+}
+document.querySelectorAll("#mobileAppNav [data-app-nav]").forEach(button => {
+  button.addEventListener("click", () => navigateApp(button.dataset.appNav));
+});
