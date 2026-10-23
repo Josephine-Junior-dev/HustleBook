@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101b32">
+  <meta name="description" content="HustleBook helps you manage personal money, household budgets and business finances in one simple place.">
+  <title>HustleBook — Every Hustle. Every Home. Every Shilling.</title>
+  <style>
+    :root{--navy:#101b32;--navy2:#172744;--green:#28d69a;--mint:#dcfff1;--ink:#18243b;--muted:#718096;--line:#e7edf3;--paper:#f6f9fc;--white:#fff}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:var(--white);line-height:1.5}a{color:inherit;text-decoration:none}.wrap{width:min(1120px,calc(100% - 36px));margin:auto}
+    header{background:var(--navy);color:white;position:relative;overflow:hidden}nav{height:76px;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{display:flex;align-items:center;gap:10px;font-size:21px;font-weight:850;letter-spacing:-.7px}.logo{width:38px;height:38px;border-radius:13px;background:var(--green);display:grid;place-items:center;color:var(--navy);font-weight:950;font-size:21px;box-shadow:0 8px 28px #28d69a30}.navlinks{display:flex;gap:26px;color:#cbd5e1;font-size:14px}.navactions{display:flex;gap:10px;align-items:center}.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 17px;border-radius:12px;font-weight:750;font-size:14px;border:1px solid transparent;cursor:pointer;transition:transform .18s,box-shadow .18s}.btn:hover{transform:translateY(-2px)}.btn-green{background:var(--green);color:#08241d;box-shadow:0 8px 24px #28d69a26}.btn-outline{border-color:#ffffff38;color:white}.hero{padding:70px 0 84px;display:grid;grid-template-columns:1.04fr .96fr;gap:45px;align-items:center;position:relative}.eyebrow{display:inline-flex;align-items:center;gap:8px;border:1px solid #ffffff25;background:#ffffff0c;border-radius:100px;padding:7px 12px;color:#b9fbe3;font-size:12px;font-weight:750;letter-spacing:.4px}.dot{width:7px;height:7px;background:var(--green);border-radius:50%}h1{font-size:clamp(42px,5.4vw,67px);line-height:1.04;letter-spacing:-2.8px;margin:22px 0 20px;max-width:650px}h1 span{color:var(--green)}.hero p{color:#b8c5d8;font-size:17px;max-width:530px;line-height:1.75}.hero-buttons{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}.trust{display:flex;align-items:center;gap:10px;color:#aab9cc;font-size:12px;margin-top:22px}.trust b{color:white}.mock-shell{background:#fff;border:1px solid #ffffff20;border-radius:27px;padding:13px;box-shadow:0 35px 90px #0005;transform:rotate(1deg);max-width:450px;margin-left:auto;width:100%}.mock{background:#f6f9fc;border-radius:18px;padding:20px;color:var(--ink)}.mock-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}.mock-brand{font-weight:850;font-size:14px}.avatar{width:33px;height:33px;border-radius:50%;background:#d9f9ed;color:#08744e;display:grid;place-items:center;font-weight:800}.balance{background:linear-gradient(135deg,#132340,#1d3a59);color:white;border-radius:18px;padding:20px;position:relative;overflow:hidden}.balance:after{content:"";position:absolute;width:150px;height:150px;border:1px solid #ffffff18;border-radius:50%;right:-48px;top:-65px;box-shadow:0 0 0 20px #ffffff08,0 0 0 40px #ffffff05}.balance small{color:#b7c8d9}.amount{font-size:31px;font-weight:850;letter-spacing:-1px;margin:5px 0}.positive{color:#6ff0bf;font-size:12px}.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}.stat{background:white;border:1px solid #e9eff5;padding:14px;border-radius:14px}.stat small{display:block;color:#75839a;font-size:11px}.stat strong{font-size:17px;display:block;margin-top:5px}.stat .symbol{float:right;color:#07865a;background:#e1fbf0;border-radius:9px;padding:4px 7px;font-size:12px}.section{padding:76px 0}.section-soft{background:var(--paper)}.section-head{text-align:center;max-width:680px;margin:0 auto 36px}.kicker{color:#07865a;font-size:12px;text-transform:uppercase;letter-spacing:1.4px;font-weight:850}.section h2{font-size:clamp(29px,4vw,43px);line-height:1.12;letter-spacing:-1.5px;margin:12px 0}.section-head p{color:var(--muted);font-size:16px}.features{display:grid;grid-template-columns:repeat(3,1fr);gap:17px}.feature{background:white;border:1px solid var(--line);border-radius:19px;padding:24px;box-shadow:0 5px 22px #16264205}.feature-icon{width:45px;height:45px;display:grid;place-items:center;background:#e2fff2;border-radius:14px;font-size:22px}.feature h3{margin:17px 0 7px;font-size:18px}.feature p{margin:0;color:var(--muted);font-size:14px;line-height:1.7}.pill-row{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}.pill{background:white;border:1px solid var(--line);border-radius:100px;padding:10px 15px;color:#34445c;font-weight:650;font-size:13px}.security{background:var(--navy);color:white;border-radius:25px;padding:35px;display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:center}.security p{color:#b8c5d8}.security-list{display:grid;grid-template-columns:1fr 1fr;gap:12px}.security-item{border:1px solid #ffffff1c;background:#ffffff08;border-radius:13px;padding:13px;font-size:13px}.check{color:var(--green);font-weight:900;margin-right:7px}.cta{background:linear-gradient(130deg,#e7fff5,#f4fbff);border:1px solid #d6f8e9;border-radius:24px;padding:40px;text-align:center}.cta p{color:var(--muted);max-width:540px;margin:10px auto 22px}footer{background:#0b1426;color:#b5c1d2;padding:32px 0;font-size:12px}.foot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}.foot .brand{color:white;font-size:18px}.foot-links{display:flex;gap:18px;flex-wrap:wrap}
+    @media(max-width:800px){.navlinks{display:none}.hero{grid-template-columns:1fr;padding:48px 0 58px;gap:35px}.mock-shell{margin:0 auto;max-width:470px}.features{grid-template-columns:1fr 1fr}.security{grid-template-columns:1fr}.section{padding:58px 0}h1{letter-spacing:-1.8px}.navactions .btn-outline{display:none}}
+    @media(max-width:520px){.wrap{width:min(100% - 28px,1120px)}nav{height:66px}.brand{font-size:19px}.navactions .btn{padding:10px 12px;font-size:12px}.hero{padding-top:38px}.hero p{font-size:15px}h1{font-size:43px}.hero-buttons .btn{width:100%}.mock{padding:14px}.balance{padding:17px}.amount{font-size:27px}.section-head{margin-bottom:25px}.features{grid-template-columns:1fr}.feature{padding:21px}.security{padding:24px}.security-list{grid-template-columns:1fr}.cta{padding:28px 20px}.foot{flex-direction:column}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <nav aria-label="Main navigation">
+      <a class="brand" href="#" aria-label="HustleBook home"><span class="logo">H</span> HustleBook</a>
+      <div class="navlinks"><a href="#features">Features</a><a href="#who">Who it's for</a><a href="#security">Security</a></div>
+      <div class="navactions"><a class="btn btn-outline" href="#get-started">Log in</a><a class="btn btn-green" href="#get-started">Get started <span>↗</span></a></div>
+    </nav>
+    <section class="hero">
+      <div>
+        <div class="eyebrow"><span class="dot"></span> YOUR MONEY. YOUR BUSINESS. ONE PLACE.</div>
+        <h1>Make every shilling <span>work smarter.</span></h1>
+        <p>Manage your money, organise your household and grow your business with one beautifully simple platform—built for your phone and ready for your next big step.</p>
+        <div class="hero-buttons"><a class="btn btn-green" href="#get-started">Start your journey <span>→</span></a><a class="btn btn-outline" href="#features">Explore features</a></div>
+        <div class="trust">✦ <span><b>Made for real life.</b> From personal budgets to growing businesses.</span></div>
+      </div>
+      <div class="mock-shell" aria-label="Illustration of the HustleBook dashboard">
+        <div class="mock">
+          <div class="mock-top"><div><div class="mock-brand">✦ HustleBook</div><small style="color:#75839a">Your overview</small></div><div class="avatar">J</div></div>
+          <div class="balance"><small>Total balance</small><div class="amount">KSh 84,250</div><div class="positive">↗ You're building good habits</div></div>
+          <div class="stats"><div class="stat"><span class="symbol">↗</span><small>Income this month</small><strong>KSh 65,000</strong></div><div class="stat"><span class="symbol" style="color:#c05656;background:#fff0f0">↘</span><small>Expenses this month</small><strong>KSh 28,450</strong></div></div>
+          <div class="stat"><small>YOUR NEXT GOAL</small><strong>Emergency fund <span style="float:right;color:#07865a;font-size:12px">68%</span></strong><div style="height:7px;background:#e5edf0;border-radius:10px;margin-top:12px;overflow:hidden"><div style="width:68%;height:100%;background:#28d69a;border-radius:10px"></div></div></div>
+          <div style="font-size:11px;color:#75839a;text-align:center;margin-top:14px">A preview of your financial home</div>
+        </div>
+      </div>
+    </section>
+  </div>
+</header>
+<main>
+  <section class="section" id="features">
+    <div class="wrap"><div class="section-head"><div class="kicker">One platform. More possibilities.</div><h2>Everything you need to move forward.</h2><p>Start with what matters today. Add more tools as your life, family or business grows.</p></div>
+      <div class="features">
+        <article class="feature"><div class="feature-icon">💸</div><h3>Personal money</h3><p>Track income, expenses, budgets, debts and savings goals without the confusion.</p></article>
+        <article class="feature"><div class="feature-icon">🏡</div><h3>Household finances</h3><p>Plan family bills, manage shared costs and work towards goals together.</p></article>
+        <article class="feature"><div class="feature-icon">📈</div><h3>Business insights</h3><p>Understand sales, spending, cash flow and business performance at a glance.</p></article>
+        <article class="feature"><div class="feature-icon">📦</div><h3>Stock & products</h3><p>Organise products, suppliers, purchases and stock levels as you grow.</p></article>
+        <article class="feature"><div class="feature-icon">🧾</div><h3>Invoices & payments</h3><p>Prepare professional invoices, record payments and follow up outstanding balances.</p></article>
+        <article class="feature"><div class="feature-icon">🎯</div><h3>Goals & reminders</h3><p>Keep savings targets and important due dates visible so nothing slips by.</p></article>
+      </div>
+    </div>
+  </section>
+  <section class="section section-soft" id="who">
+    <div class="wrap"><div class="section-head"><div class="kicker">Built for every kind of hustle</div><h2>Your life is unique. Your dashboard should be too.</h2><p>Choose the tools that fit you. Keep your experience simple, personal and ready to expand.</p></div>
+      <div class="pill-row"><span class="pill">👤 Individuals</span><span class="pill">👨‍👩‍👧 Families</span><span class="pill">🎓 Students</span><span class="pill">🧑‍💻 Freelancers</span><span class="pill">🛍️ Online sellers</span><span class="pill">🏪 Shops</span><span class="pill">🧰 Service providers</span><span class="pill">🚚 Transport operators</span><span class="pill">🌱 Farmers</span><span class="pill">🏢 Growing teams</span></div>
+    </div>
+  </section>
+  <section class="section" id="security">
+    <div class="wrap"><div class="security"><div><div class="kicker">Trust by design</div><h2>Financial information deserves care.</h2><p>HustleBook is being designed with privacy, secure account access and responsible payment handling at its foundation. Card payments will use a suitable payment provider rather than storing full card details in HustleBook.</p></div><div class="security-list"><div class="security-item"><span class="check">✓</span>Private customer accounts</div><div class="security-item"><span class="check">✓</span>Protected data access</div><div class="security-item"><span class="check">✓</span>Trusted payment checkout</div><div class="security-item"><span class="check">✓</span>Clear billing information</div></div></div></div>
+  </section>
+  <section class="section" id="get-started"><div class="wrap"><div class="cta"><div class="kicker">Your next chapter starts here</div><h2>Bring your money life into focus.</h2><p>One clear place to understand today, plan for tomorrow and grow at your own pace.</p><a class="btn btn-green" href="mailto:hello@hustlebook.app?subject=HustleBook%20early%20access">Get early access <span>→</span></a><p style="font-size:11px;margin-bottom:0">HustleBook is in development. Account registration and payment features are not active yet.</p></div></div></section>
+</main>
+<footer><div class="wrap foot"><a class="brand" href="#"><span class="logo">H</span> HustleBook</a><div>Every Hustle. Every Home. Every Shilling.</div><div>© <span id="year"></span> HustleBook. Built for what's next.</div></div></footer>
+<script>document.getElementById("year").textContent=new Date().getFullYear();</script>
+</body>
+</html>
