@@ -735,19 +735,26 @@ function navigateApp(section) {
     $("appOverlay")?.scrollTo({top:0,behavior:"smooth"});
     return;
   }
-  if (section === "transactions") {
+  if (section === "money") {
     $("txPanel")?.scrollIntoView({behavior:"smooth",block:"start"});
     return;
   }
-
-  const nextModule = section === "budgets" ? "budgets"
-    : section === "debts" ? "debts"
-    : "savings";
-  currentModule = nextModule;
-  editingModuleRecord = null;
-  renderModuleShell();
-  loadModuleRows();
-  $("moduleCrud")?.scrollIntoView({behavior:"smooth",block:"start"});
+  if (section === "shop") {
+    $("shopPanel")?.scrollIntoView({behavior:"smooth",block:"start"});
+    return;
+  }
+  if (section === "goals") {
+    currentModule = "savings";
+    editingModuleRecord = null;
+    renderModuleShell();
+    loadModuleRows();
+    $("moduleCrud")?.scrollIntoView({behavior:"smooth",block:"start"});
+    return;
+  }
+  if (section === "more") {
+    $("quickFeatureNav")?.scrollIntoView({behavior:"smooth",block:"start"});
+    return;
+  }
 }
 
 /* Delegated click handling keeps navigation working after UI rerenders. */
