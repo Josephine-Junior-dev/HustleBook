@@ -121,12 +121,6 @@ footer{background:linear-gradient(120deg,#142d20,#1e4930)!important}
 .tx-list{width:100%;border-collapse:collapse;font-size:13px}.tx-list th,.tx-list td{text-align:left;padding:11px 7px;border-bottom:1px solid #edf0f6}.tx-list th{color:#68758d}
 @media(max-width:600px){.app-grid{grid-template-columns:1fr}.tx-form{grid-template-columns:1fr}.tx-form .full{grid-column:auto}.app-stat strong{font-size:23px}.auth-card{padding:21px}}
 
-.google-divider{display:flex;align-items:center;gap:12px;color:#849488;font-size:11px;font-weight:800;margin:15px 0 12px}
-.google-divider:before,.google-divider:after{content:"";height:1px;background:#dcebe0;flex:1}
-.google-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:11px;min-height:48px;border:1px solid #d5e6da;border-radius:12px;background:#fff;color:#233a2b;font:750 14px inherit;cursor:pointer;box-shadow:0 5px 16px #204b2d0a;transition:background .18s,transform .18s}
-.google-btn:hover{background:#f3fff5;transform:translateY(-1px)}
-.google-btn:disabled{opacity:.6;cursor:wait;transform:none}
-.google-mark{font:bold 22px Arial,sans-serif;color:#4285f4}
 </style>
 <div class="auth-overlay" id="authOverlay" role="dialog" aria-modal="true" aria-label="HustleBook account">
  <div class="auth-card"><button class="auth-close" id="authClose" aria-label="Close">×</button><div class="logo" style="width:42px;height:42px">H</div>
@@ -135,8 +129,6 @@ footer{background:linear-gradient(120deg,#142d20,#1e4930)!important}
  <label for="authPassword">Password</label><input id="authPassword" type="password" autocomplete="current-password" minlength="6" required placeholder="At least 6 characters">
  <label id="nameLabel" for="authName" style="display:none">Your name</label><input id="authName" style="display:none" autocomplete="name" placeholder="Your name">
  <button class="btn btn-green" id="authSubmit" type="submit">Continue securely</button></form>
- <div class="google-divider"><span>OR</span></div>
- <button class="google-btn" id="googleSignIn" type="button"><span class="google-mark" aria-hidden="true">G</span><span>Continue with Google</span></button>
  <p class="auth-msg" id="authMsg" aria-live="polite"></p><p style="text-align:center"> <a href="#" id="authSwitch" style="color:#4778f5;font-weight:750">Create an account</a></p>
  </div></div>
 <div class="app-overlay" id="appOverlay">
