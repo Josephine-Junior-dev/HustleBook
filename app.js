@@ -44,6 +44,7 @@ function escapeText(value) {
 }
 function showAuth(mode = "login") {
   authMode = mode;
+  document.body.classList.add("app-mode");
   $("authOverlay").style.display = "flex";
   $("appOverlay").style.display = "none";
   setMessage("authMsg", "");
@@ -411,7 +412,7 @@ db.auth.onAuthStateChange((event, session) => {
     document.body.classList.add("app-mode");
     $("appOverlay").style.display = "none";
     showAuth("login");
-    window.scrollTo({top:0,behavior:"smooth"});
+    $("authOverlay").style.display = "flex";
   }
 });
 
@@ -429,7 +430,7 @@ function navigateApp(section) {
   });
 
   if (section === "home") {
-    window.scrollTo({top:0,behavior:"smooth"});
+    $("appOverlay")?.scrollTo({top:0,behavior:"smooth"});
     return;
   }
   if (section === "transactions") {
