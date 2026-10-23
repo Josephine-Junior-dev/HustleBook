@@ -511,7 +511,7 @@ async function saveModuleRecord(event) {
   const cfg=moduleConfigs[currentModule];
   const payload={user_id:activeUser.id};
   if (activeWorkspaceId) payload.workspace_id = activeWorkspaceId;
-  if(["budgets","debts","savings","products","invoices","jobs","reminders"].includes(currentModule)) payload.currency="KES";
+  if(["budgets","debts","savings","products","invoices"].includes(currentModule)) payload.currency="KES";
   cfg.fields.forEach(field=>{
     const el=$("mf_"+field[0]);
     if(!el)return;
