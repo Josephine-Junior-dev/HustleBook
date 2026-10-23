@@ -66,6 +66,7 @@ function showAuth(mode = "login") {
 function showApp(user) {
   if (!user) return;
   activeUser = user;
+  document.body.classList.add("app-mode");
   $("authOverlay").style.display = "none";
   $("appOverlay").style.display = "block";
   $("userGreeting").textContent = (user.user_metadata?.display_name || user.email?.split("@")[0] || "there").trim().split(/\s+/)[0];
@@ -399,7 +400,9 @@ db.auth.onAuthStateChange((event, session) => {
   }
   if (event === "SIGNED_OUT") {
     activeUser = null;
+    document.body.classList.remove("app-mode");
     $("appOverlay").style.display = "none";
+    window.scrollTo({top:0,behavior:"smooth"});
   }
 });
 
