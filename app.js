@@ -102,6 +102,24 @@ function renderQuickNavigation() {
     $("moduleCrud")?.scrollIntoView({behavior:"smooth",block:"start"});
   });
 }
+function renderWorkspaceCards() {
+  const welcome = document.querySelector("#appOverlay .app-welcome");
+  if (!welcome || $("workspaceChoiceCard")) return;
+  const card = document.createElement("section");
+  card.id = "workspaceChoiceCard";
+  card.className = "app-panel";
+  card.innerHTML = '<h2 style="margin:0 0 5px;font-size:20px">Choose your finance area</h2><p style="margin:0 0 12px;color:#69766d;font-size:13px">Tap Personal, Household or Business to open its transactions and totals.</p><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px"><button type="button" data-workspace-card="personal" class="btn btn-outline" style="min-height:72px;display:flex;flex-direction:column;gap:4px;white-space:normal">👤<span>Personal</span></button><button type="button" data-workspace-card="household" class="btn btn-outline" style="min-height:72px;display:flex;flex-direction:column;gap:4px;white-space:normal">🏡<span>Household & Family</span></button><button type="button" data-workspace-card="business" class="btn btn-outline" style="min-height:72px;display:flex;flex-direction:column;gap:4px;white-space:normal">💼<span>Business & Hustles</span></button></div>';
+  welcome.insertAdjacentElement("afterend", card);
+  card.addEventListener("click", event => {
+    const button = event.target.closest("[data-workspace-card]");
+    if (!button) return;
+    const picker = $("workspacePicker");
+    if (!picker) return;
+    picker.value = button.dataset.workspaceCard;
+    picker.dispatchEvent(new Event("change"));
+    $("txPanel")?.scrollIntoView({behavior:"smooth",block:"start"});
+  });
+}
 function showApp(user) {
   if (!user) return;
   activeUser = user;
@@ -111,6 +129,7 @@ function showApp(user) {
   $("userGreeting").textContent = (user.user_metadata?.display_name || user.email?.split("@")[0] || "there").trim().split(/\s+/)[0];
   $("txDate").value = localDate();
   renderQuickNavigation();
+  renderWorkspaceCards();
   loadWorkspacesAndTransactions();
   renderModuleShell();
   loadModuleRows();
