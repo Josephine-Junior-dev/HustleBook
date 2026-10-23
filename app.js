@@ -67,6 +67,41 @@ function showAuth(mode = "login") {
     ? "Already have an account? Log in"
     : "New to HustleBook? Create an account";
 }
+function renderQuickNavigation() {
+  const welcome = document.querySelector("#appOverlay .app-welcome");
+  if (!welcome || $("quickFeatureNav")) return;
+  const nav = document.createElement("section");
+  nav.id = "quickFeatureNav";
+  nav.className = "app-panel";
+  nav.innerHTML = '<h2 style="margin:0 0 5px;font-size:20px">All features</h2><p style="margin:0 0 12px;color:#69766d;font-size:13px">Tap any section to open it directly.</p><div id="quickFeatureButtons" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px"></div>';
+  const buttons = [
+    ["transactions","💸","Transactions"],
+    ["budgets","📊","Budgets"],
+    ["debts","🤝","Debts"],
+    ["savings","🎯","Savings goals"],
+    ["customers","👥","Customers"],
+    ["products","📦","Products & stock"],
+    ["invoices","🧾","Invoices"]
+  ];
+  nav.querySelector("#quickFeatureButtons").innerHTML = buttons.map(([key,icon,label]) =>
+    '<button type="button" data-quick-feature="'+key+'" class="btn btn-outline" style="justify-content:flex-start;text-align:left;min-height:46px;white-space:normal">'+icon+' '+label+'</button>'
+  ).join("");
+  welcome.insertAdjacentElement("afterend", nav);
+  nav.addEventListener("click", event => {
+    const button = event.target.closest("[data-quick-feature]");
+    if (!button) return;
+    const key = button.dataset.quickFeature;
+    if (key === "transactions") {
+      $("txPanel")?.scrollIntoView({behavior:"smooth",block:"start"});
+      return;
+    }
+    currentModule = key;
+    editingModuleRecord = null;
+    renderModuleShell();
+    loadModuleRows();
+    $("moduleCrud")?.scrollIntoView({behavior:"smooth",block:"start"});
+  });
+}
 function showApp(user) {
   if (!user) return;
   activeUser = user;
@@ -75,6 +110,7 @@ function showApp(user) {
   $("appOverlay").style.display = "block";
   $("userGreeting").textContent = (user.user_metadata?.display_name || user.email?.split("@")[0] || "there").trim().split(/\s+/)[0];
   $("txDate").value = localDate();
+  renderQuickNavigation();
   loadWorkspacesAndTransactions();
   renderModuleShell();
   loadModuleRows();
