@@ -56,3 +56,12 @@ GitHub Pages only hosts static frontend files; it does not run private server-si
 Run `supabase/migrations/20261023_workspace_business_modules.sql` in the Supabase SQL Editor after the base schema. It adds workspace scoping to budgets, debts, savings, customers, products and invoices, plus owner-protected Suppliers, Jobs & Services, and Bills & Reminders modules. The frontend exposes these modules and scopes their records to the selected finance area. Existing NULL-workspace records remain visible in Personal only.
 
 Not yet operational: household invitations/shared access, public service-provider marketplace, invoice line-item PDF generation, scheduled email/push delivery, and verified live subscription/payment processing. These require additional membership/verification/server-side work and must be tested before being offered to customers.
+
+
+## Shop-first sales MVP
+
+After the base schema and the workspace/business migration, run `supabase/migrations/20261023_shop_sales_stock.sql` in the Supabase SQL Editor. It creates business profiles, sales and stock-movement tables, owner-based RLS policies, and the `hb_record_sale` database function. The shop dashboard lets an owner choose a business type, save a business name, record a one-product sale, and view today's sales, cash received, estimated gross profit, low-stock count and recent sales. The sale function checks that the product belongs to the signed-in user's Business workspace and has enough stock, then records the sale and deducts stock in one database transaction.
+
+To use it: sign in, select **Business & Hustles**, open **Products / stock** in All features and add products with quantity, unit cost and selling price. Then use the **Business overview** panel to save your business profile and record sales. Existing products without a workspace assignment remain in Personal; create or re-save business products while Business & Hustles is selected.
+
+The current sale form supports one product per sale. Low stock currently means quantity of 5 or less. Gross profit is an estimate and excludes operating expenses; this is not a complete accounting/tax system. Run all required SQL migrations before testing. The frontend and database workflow have not yet been end-to-end tested against a live account, so verify using a test product before relying on it for real sales.
